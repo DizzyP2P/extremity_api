@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Extremity 验证码</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            background-color: #428dfc;
+            text-align: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 20px 25px;
+            text-align: left;
+        }
+
+        .content p {
+            font-size: 16px;
+            color: #333333;
+            line-height: 1.5;
+            margin: 0 0 10px;
+        }
+
+        .code {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #428dfc;
+            background: #f9f9f9;
+            padding: 10px 20px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 14px;
+            color: #777777;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+
+        @media only screen and (max-width: 480px) {
+            .content p {
+                font-size: 14px;
+            }
+
+            .code {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>您的验证码</h1>
+    </div>
+    <div class="content">
+        <p>您好，</p>
+        <p>您正在尝试使用 Extremity 的服务。以下是您的验证码：</p>
+        <div class="code" th:text="${code}">123456</div>
+        <p>请在 <strong>5 分钟</strong> 内使用此验证码完成验证。</p>
+        <p>如果您未尝试进行此操作，请忽略本邮件。</p>
+    </div>
+    <div class="footer">
+        <p>感谢您使用 Extremity！</p>
+        <p>此邮件为系统自动发送，请勿直接回复。</p>
+    </div>
+</div>
+</body>
+</html>
