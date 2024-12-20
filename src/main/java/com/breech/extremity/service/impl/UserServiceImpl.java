@@ -68,7 +68,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                     user.setAvatarUrl(DEFAULT_AVATAR);
                     userMapper.insertSelective(user);
                     user = userMapper.selectByAccount(email);
-                    Role role = roleMapper.selectRoleByInputCode("user");
+                    Role role = roleMapper.selectRoleByInputCode("unauthorized_user");
                     userMapper.insertUserRole(user.getIdUser(), role.getIdRole());
                     redisTemplate.delete(email);
                     return true;
@@ -98,6 +98,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         return account;
     }
 
+
     @Override
     public TokenUser login(String account, String password) {
         User user = userMapper.selectByAccount(account);
@@ -110,6 +111,31 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
                 redisTemplate.boundValueOps(tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
 //                loginRecordService.saveLoginRecord(user.getIdUser());
+                return tokenUser;
+            }
+        }
+        throw new AccountException();
+    }
+
+    @Override
+    public TokenUser adminLogin(String account, String password) {
+        User user = userMapper.selectByAccount(account);
+        if (user != null) {
+            List<Role> roles = roleMapper.selectRoleByIdUser(user.getIdUser());
+            Boolean isTopop = false;
+            for(Role item:roles){
+                if(item.getInputCode().equals("topop")){
+                    isTopop = true;
+                    break;
+                }
+            }
+            if (isTopop&&Utils.comparePwd(password, user.getPassword())) {
+                userMapper.updateLastLoginTime(user.getIdUser());
+                userMapper.updateLastOnlineTimeByAccount(user.getAccount());
+                TokenUser tokenUser = new TokenUser();
+                tokenUser.setToken(tokenManager.createToken(user.getAccount()));
+                tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
+                redisTemplate.boundValueOps(tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
                 return tokenUser;
             }
         }

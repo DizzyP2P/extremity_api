@@ -10,7 +10,6 @@ import com.breech.extremity.util.Utils;
 import org.apache.commons.lang.time.StopWatch;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -103,23 +102,21 @@ public class JavaMailServiceImpl implements JavaMailService {
         props.put("mail.user", USERNAME);
         props.put("mail.password", PASSWORD);
         mailSender.setJavaMailProperties(props);
-        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom(USERNAME);
-        simpleMailMessage.setTo(to);
+        Map<String, Object> thymeleafTemplateVariable = new HashMap<String, Object>(1);
+
         if (type == 0) {
             Integer code = Utils.genCode();
             redisService.set(to, code, 5 * 60);
-            simpleMailMessage.setSubject("新用户注册邮箱验证");
-            simpleMailMessage.setText("From Extremity, 您的校验码是 " + code + ",有效时间 5 分钟，请不要泄露验证码给其他人。如非本人操作,请忽略！");
-            mailSender.send(simpleMailMessage);
+            String thymeleafTemplatePath = "mail/registerCodeTemplate.html";
+            thymeleafTemplateVariable.put("code", code);
+            sendTemplateEmail(USERNAME,new String[]{to},new String[]{},
+                    "Extremity 验证码",thymeleafTemplatePath,thymeleafTemplateVariable);
             return 1;
         } else if (type == 1) {
             String code = Utils.entryptPassword(to);
             String url = BASE_URL+ "/forget-password?code=" + code;
             redisService.set(code, to, 15 * 60);
-
             String thymeleafTemplatePath = "mail/forgetPasswordTemplate";
-            Map<String, Object> thymeleafTemplateVariable = new HashMap<String, Object>(1);
             thymeleafTemplateVariable.put("url", url);
 
             sendTemplateEmail(USERNAME,

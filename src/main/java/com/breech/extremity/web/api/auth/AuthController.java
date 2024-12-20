@@ -58,6 +58,13 @@ public class AuthController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
+
+    @PostMapping("/adminlogin")
+    public GlobalResult<TokenUser> adminLogin(@RequestBody User user) {
+        TokenUser tokenUser = userService.login(user.getAccount(), user.getPassword());
+        return GlobalResultGenerator.genSuccessResult(tokenUser);
+    }
+
     @PostMapping("/login")
     public GlobalResult<TokenUser> login(@RequestBody User user) {
         TokenUser tokenUser = userService.login(user.getAccount(), user.getPassword());

@@ -20,7 +20,4 @@ public class TokenUser {
     private String refreshToken;
 
     private Set<String> scope;
-
-    private String bankAccount;
-
 }

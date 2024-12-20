@@ -36,6 +36,7 @@ public class JwtRealm extends AuthorizingRealm {
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
         String accessToken = (String) principals.getPrimaryPrincipal();
         TokenUser tokenUser = UserUtils.getTokenUser(accessToken);
+
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
         User user = new User();
         user.setIdUser(tokenUser.getIdUser());
@@ -47,8 +48,6 @@ public class JwtRealm extends AuthorizingRealm {
                     authorizationInfo.addStringPermission(role.getInputCode());
                 }
             }
-            // 添加用户权限
-            authorizationInfo.addStringPermission("user");
         } catch (Exception e) {
             e.printStackTrace();
         }

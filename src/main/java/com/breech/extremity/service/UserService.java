@@ -42,6 +42,16 @@ public interface UserService extends Service<User> {
     TokenUser login(String account, String password);
 
     /**
+     * 登录接口
+     *
+     * @param account  邮箱
+     * @param password 密码
+     * @return Map
+     */
+
+    TokenUser adminLogin(String account, String password);
+
+    /**
      * 通过 account 获取用户信息接口
      *
      * @param account 昵称
