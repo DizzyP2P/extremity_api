@@ -1,7 +1,6 @@
 package com.breech.extremity.auth;
 
-
-//import com.rymcu.forest.handler.event.AccountEvent;
+import com.breech.extremity.handler.event.AccountEvent;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
@@ -15,12 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-/**
- * 通过Redis存储和验证token的实现类
- *
- * @author ScienJus
- * @date 2015/7/31.
- */
 @Component
 public class RedisTokenManager implements TokenManager {
 
@@ -59,7 +52,7 @@ public class RedisTokenManager implements TokenManager {
         key.append(JwtConstants.LAST_ONLINE).append(model.getUsername());
         String result = redisTemplate.boundValueOps(key.toString()).get();
         if (StringUtils.isBlank(result)) {
-//            applicationEventPublisher.publishEvent(new AccountEvent(model.getUsername()));
+            applicationEventPublisher.publishEvent(new AccountEvent(model.getUsername()));
             redisTemplate.boundValueOps(key.toString()).set(LocalDateTime.now().toString(), JwtConstants.LAST_ONLINE_EXPIRES_MINUTE, TimeUnit.MINUTES);
         }
         return true;

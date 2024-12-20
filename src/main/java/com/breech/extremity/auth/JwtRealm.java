@@ -1,10 +1,10 @@
 package com.breech.extremity.auth;
 
-import com.rymcu.forest.dto.TokenUser;
-import com.rymcu.forest.entity.Role;
-import com.rymcu.forest.entity.User;
-import com.rymcu.forest.service.RoleService;
-import com.rymcu.forest.util.UserUtils;
+import com.breech.extremity.dto.TokenUser;
+import com.breech.extremity.model.Role;
+import com.breech.extremity.model.User;
+import com.breech.extremity.service.RoleService;
+import com.breech.extremity.util.UserUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -19,13 +19,6 @@ import org.apache.shiro.subject.PrincipalCollection;
 import javax.annotation.Resource;
 import java.util.List;
 
-/**
- * Created on 2022/10/27 20:04.
- *
- * @author ronger
- * @email ronger-x@outlook.com
- * @desc : com.rymcu.forest.auth
- */
 public class JwtRealm extends AuthorizingRealm {
     @Resource
     private RoleService roleService;

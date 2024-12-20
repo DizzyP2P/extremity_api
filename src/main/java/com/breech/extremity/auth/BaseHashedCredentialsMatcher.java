@@ -1,6 +1,6 @@
 package com.breech.extremity.auth;
 
-import com.rymcu.forest.util.UserUtils;
+import com.breech.extremity.util.UserUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;

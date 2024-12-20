@@ -45,11 +45,12 @@ spring:
         stat:
           log-slow-sql: true
 
-#  mail:
-#    host: smtp.ym.163.com
-#    port: 465
-#    username: service@rymcu.com
-#    password: 4W3tCXdyk0Gm
+  mail:
+    host: smtp.163.com
+    port: 465
+    username: pigremaaaa@163.com
+    password: AYTZF5G3fewQmfkQ
+    protocol: smtps
 
 logging:
   config: classpath:logback-spring.xml
@@ -59,3 +60,5 @@ server:
     context-path: /extremity
   max-http-header-size: 1048576
   shutdown: graceful
+resource:
+  domain: localhost:8080 #  网站域名，本地测试时填写前端项目访问地址即可

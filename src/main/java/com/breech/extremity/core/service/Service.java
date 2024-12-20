@@ -1,4 +1,4 @@
-package com.breech.extremity.service;
+package com.breech.extremity.core.service;
 
 import com.breech.extremity.core.exception.ServiceException;
 import org.apache.ibatis.exceptions.TooManyResultsException;

@@ -1,4 +1,4 @@
-package com.breech.extremity.service;
+package com.breech.extremity.core.service;
 import com.breech.extremity.core.exception.ServiceException;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +10,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
-public abstract class AbstractService<T> implements Service<T> {
 
-    @Resource
+public abstract class AbstractService<T> implements Service<T> {
+    @Autowired
     protected Mapper<T> mapper;
     /**
      * 当前泛型真实类型的Class

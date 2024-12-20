@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.breech.extremity.mapper.RoleMapper">
+    <resultMap id="BaseResultMap" type="com.breech.extremity.model.Role">
+        <id column="id" jdbcType="INTEGER" property="idRole"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="input_code" jdbcType="VARCHAR" property="inputCode"/>
+        <result column="weights" jdbcType="TINYINT" property="weights"/>
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime"/>
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+    </resultMap>
+    <update id="updateStatus">
+        update extremity_role set status = #{status},updated_time = sysdate() where id = #{idRole}
+    </update>
+
+    <update id="update">
+        update extremity_role set name = #{name}, input_code = #{inputCode}, weights = #{weights}, updated_time = sysdate() where id = #{idRole}
+    </update>
+
+    <select id="selectRoleByIdUser" resultMap="BaseResultMap">
+        select er.* from extremity_user_role eur left join extremity_role er on eur.id_role = er.id where id_user = #{id}
+    </select>
+    <select id="selectRoleByInputCode" resultMap="BaseResultMap">
+        select * from extremity_role where input_code = #{inputCode}
+    </select>
+
+</mapper>
