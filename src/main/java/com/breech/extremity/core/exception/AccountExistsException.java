@@ -1,7 +1,6 @@
 package com.breech.extremity.core.exception;
 
-import org.apache.shiro.authc.AccountException;
-public class AccountExistsException extends AccountException {
+public class AccountExistsException extends AuthenticationException{
     private static final long serialVersionUID = 3206734387536223284L;
     public AccountExistsException() {
     }

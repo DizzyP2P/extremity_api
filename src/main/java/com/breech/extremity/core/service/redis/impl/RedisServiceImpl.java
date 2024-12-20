@@ -24,11 +24,8 @@ import java.util.*;
 @Component("redisService")
 @EnableConfigurationProperties({RedisProperties.class})
 public class RedisServiceImpl implements RedisService {
-
     private static final Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
-
     private static JedisPool pool = null;
-
     @Resource
     private RedisProperties redisProperties;
 

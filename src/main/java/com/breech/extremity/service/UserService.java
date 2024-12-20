@@ -4,6 +4,7 @@ package com.breech.extremity.service;
 import com.breech.extremity.core.exception.ServiceException;
 import com.breech.extremity.core.service.Service;
 import com.breech.extremity.dto.*;
+import com.breech.extremity.model.Role;
 import com.breech.extremity.model.User;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 
@@ -13,6 +14,8 @@ import java.util.Set;
 
 public interface UserService extends Service<User> {
 
+    List<Role> findRolesByUserId(Long userId);
+    UserRolesDTO findRolesByAccount(String account);
     /**
      * 通过账号查询用户信息
      *

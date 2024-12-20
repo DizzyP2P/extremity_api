@@ -8,6 +8,6 @@ import java.util.List;
 public interface RoleService extends Service<Role> {
     List<Role> selectRoleByUser(User user);
     List<Role> findByIdUser(Long idUser);
-    boolean updateStatus(Long idRole, String status) throws ServiceException;
+    boolean updateStatus(Integer idRole, String status) throws ServiceException;
     boolean saveRole(Role role) throws ServiceException;
 }

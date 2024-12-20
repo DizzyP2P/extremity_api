@@ -53,7 +53,8 @@ spring:
     protocol: smtps
 
 logging:
-  config: classpath:logback-spring.xml
+  level:
+    org.apache.shiro: Trace
 server:
   port: 8080
   servlet:

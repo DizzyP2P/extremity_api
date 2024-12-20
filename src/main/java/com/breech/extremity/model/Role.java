@@ -19,7 +19,7 @@ public class Role implements Serializable, Cloneable {
     @Id
     @Column(name = "id")
     @GeneratedValue(generator = "JDBC")
-    private Long idRole;
+    private Integer idRole;
 
     /**
      * 角色名称
