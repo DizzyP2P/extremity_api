@@ -1,7 +1,4 @@
 package com.breech.extremity.core.exception;
-
-import org.apache.shiro.authc.AuthenticationException;
-
 /**
  * 验证码错误异常类
  *

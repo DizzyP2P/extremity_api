@@ -30,7 +30,7 @@ public interface UserMapper extends Mapper<User> {
      * @param idRole
      * @return
      */
-    Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Long idRole);
+    Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
 
     /**
      * 根据账号获取获取用户信息

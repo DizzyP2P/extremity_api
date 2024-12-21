@@ -3,6 +3,7 @@ package com.breech.extremity.web.api.auth;
 import com.alibaba.fastjson2.JSONObject;
 import com.breech.extremity.auth.TokenManager;
 import com.breech.extremity.core.exception.AccountExistsException;
+import com.breech.extremity.core.exception.BusinessException;
 import com.breech.extremity.core.exception.ServiceException;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
@@ -15,8 +16,6 @@ import com.breech.extremity.service.JavaMailService;
 import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.BeanCopierUtil;
 import com.breech.extremity.util.UserUtils;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -101,7 +100,7 @@ public class AuthController {
                 throw new ServiceException(NormalResponseMessage.SEND_FAIL.getMessage());
             }
         } else {
-            throw new UnknownAccountException("未知账号");
+            throw new BusinessException("未知账号");
         }
         return GlobalResultGenerator.genSuccessResult(NormalResponseMessage.SEND_SUCCESS.getMessage());
     }

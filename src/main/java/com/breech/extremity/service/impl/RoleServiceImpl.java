@@ -29,7 +29,7 @@ public class RoleServiceImpl extends AbstractService<Role> implements RoleServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateStatus(Long idRole, String status) throws ServiceException {
+    public boolean updateStatus(Integer idRole, String status) throws ServiceException {
         Integer result = roleMapper.updateStatus(idRole, status);
         if (result == 0) {
             throw new ServiceException("更新失败");
