@@ -9,12 +9,14 @@ import com.breech.extremity.model.User;
 import org.apache.ibatis.exceptions.TooManyResultsException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
 public interface UserService extends Service<User> {
 
     List<Role> findRolesByUserId(Long userId);
+
     UserRolesDTO findRolesByAccount(String account);
     /**
      * 通过账号查询用户信息
@@ -185,4 +187,16 @@ public interface UserService extends Service<User> {
     Set<String> findUserPermissions(User user);
 
     boolean hasAdminPermission(String account);
+
+
+    /**
+     * 根据role_id 返回用户分组
+     *
+     * @param roleIds
+     * @return user_list
+     *
+    */
+    Map<Integer,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
+
+    boolean addUser(User user, Integer roleId);
 }

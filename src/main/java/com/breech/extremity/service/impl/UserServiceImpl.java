@@ -335,4 +335,43 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     public boolean hasAdminPermission(String account) {
         return userMapper.hasAdminPermission(account);
     }
+
+    @Override
+    public Map<Integer,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds){
+        // Service 负责实现具体逻辑
+        // 使用一个 Map 来存储角色ID对应的用户列表
+        Map<Integer, List<UserDTO>> result = new HashMap<>();
+
+        for (Integer roleId : roleIds) {
+            List<UserDTO> users = userMapper.getUsersByRoleId(roleId);
+            result.put(roleId, users);
+        }
+        // 返回所有角色对应的用户数据
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean addUser(User user, Integer roleId){
+        try {
+            // 1. 插入用户
+            userMapper.addUser(user, roleId);
+
+            // 2. 获取用户ID
+            Long userId = user.getIdUser();
+            if (userId == null) {
+                throw new RuntimeException("用户插入失败");
+            }
+
+            // 4. 插入用户角色
+            int rowsAffected = userMapper.insertUserRole(userId, roleId);
+            if (rowsAffected <= 0) {
+                // 5. 如果插入用户角色失败，抛出异常
+                throw new RuntimeException("插入用户角色失败");
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

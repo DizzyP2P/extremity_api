@@ -54,9 +54,7 @@
         <result column="avatar_url" property="userAvatarURL"/>
         <result column="account" property="userAccount"/>
     </resultMap>
-    <insert id="insertUserRole">
-        insert into extremity_user_role (id_user,id_role,created_time) values (#{idUser},#{idRole},sysdate())
-    </insert>
+
     <update id="updatePasswordByEmail">
         update extremity_user set password = #{password} where email = #{email}
     </update>
@@ -124,4 +122,24 @@
         select count(*) from extremity_user where account = #{account}
     </select>
 
+
+    <select id="getUsersByRoleId" resultMap="DTOResultMapper">
+        SELECT
+            r.id, nickname, avatar_type, avatar_url, account, signature, bg_img_url
+        FROM
+            extremity_user u
+                JOIN
+            extremity_user_role ur ON u.id = ur.id_user
+                JOIN
+            extremity_role r ON ur.id_role = r.id
+        WHERE
+            r.id = #{roleId};
+    </select>
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.breech.extremity.model.User">
+        INSERT INTO extremity_user (account, password, nickname, sex, avatar_type, avatar_url, email, phone, status, created_time, updated_time)
+        VALUES (#{account}, #{password}, #{nickname}, #{sex}, #{avatarType}, #{avatarUrl}, #{email}, #{phone}, #{status}, NOW(), NOW());
+    </insert>
+    <insert id="insertUserRole">
+        insert into extremity_user_role (id_user,id_role,created_time) values (#{idUser},#{idRole},sysdate())
+    </insert>
 </mapper>

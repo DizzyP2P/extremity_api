@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ronger
@@ -82,10 +83,16 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-    @GetMapping("/user/get-by-role-list")  // 根据ID列表返回对应角色
-    public GlobalResult<Boolean> getUsersByRoleLst(@RequestParam List<Integer> ids) throws Exception {
+    @GetMapping("/user/get-by-role-ids")  // 根据ID列表返回对应用户
+    public GlobalResult<Map<Integer, List<UserDTO>>> getGroupedUsersByRoleIds(@RequestParam List<Integer> ids) throws Exception {
+        Map<Integer, List<UserDTO>> groupedUsers = userService.getGroupedUsersByRoleList(ids);
+        return GlobalResultGenerator.genSuccessResult(groupedUsers);
+    }
 
-        return GlobalResultGenerator.genSuccessResult();
+    @GetMapping("/user/add-user") // 创建用户 + 授权
+    public GlobalResult<Boolean> addUser(@RequestBody User user, @RequestParam Integer idRole) throws Exception{
+        boolean flag = userService.addUser(user, idRole);
+        return GlobalResultGenerator.genSuccessResult(flag);
     }
 
 }
