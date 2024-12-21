@@ -23,7 +23,6 @@ public class UserUtils {
 
     public static User getCurrentUserByToken() {
         String account = (String)ContextHolderUtils.getRequest().getAttribute("account");
-
         if (StringUtils.isNotBlank(account)) {
             User user = userMapper.selectByAccount(account.toString());
             if (Objects.nonNull(user)) {

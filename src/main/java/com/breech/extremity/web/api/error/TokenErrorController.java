@@ -12,11 +12,14 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class TokenErrorController extends BasicErrorController {
+
     public TokenErrorController(ErrorAttributes errorAttributes, ServerProperties serverProperties) {
         super(errorAttributes, serverProperties.getError());
     }
-    @RequestMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+
+    @RequestMapping(consumes = MediaType.ALL_VALUE , produces = MediaType.ALL_VALUE)
     public GlobalResult<String> errorJson(HttpServletRequest request) {
         throw new UnauthenticatedException();
     }
+
 }

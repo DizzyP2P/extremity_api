@@ -79,6 +79,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
                     }
                 }
                 catch (Exception e) {
+                    e.printStackTrace();
                     throw new UnauthenticatedException();
                 }
             }

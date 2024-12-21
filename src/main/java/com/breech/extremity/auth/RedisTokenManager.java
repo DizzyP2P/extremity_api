@@ -10,6 +10,7 @@ import com.breech.extremity.model.Role;
 import com.breech.extremity.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.f4b6a3.ulid.UlidCreator;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang.StringUtils;
@@ -37,9 +38,7 @@ public class RedisTokenManager implements TokenManager {
     @Override
     public String createToken(UserRolesDTO user){
         // 生成 JWT Token
-
         Date now = new Date();
-
         Date expiration = new Date(now.getTime() +JwtConstants.TOKEN_EXPIRES_MINUTE * 60 * 1000); // 转换为毫秒
 
         String token = Jwts.builder()
@@ -117,6 +116,8 @@ public class RedisTokenManager implements TokenManager {
             throw new BusinessException(e.getMessage());
         }
     }
+
+
 
     @Override
     public void deleteToken(String account) {

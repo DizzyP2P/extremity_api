@@ -23,7 +23,6 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    @Value("${resource.file-download-url}")
     private String fileDownloadUrl;
     private static final Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
 

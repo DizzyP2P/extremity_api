@@ -12,6 +12,7 @@ import com.breech.extremity.model.User;
 import com.breech.extremity.mapper.RoleMapper;
 import com.breech.extremity.mapper.UserMapper;
 import com.breech.extremity.service.UserService;
+import com.mysql.cj.conf.PropertyKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.ibatis.exceptions.TooManyResultsException;
@@ -121,21 +122,18 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         log.warn(account+password);
         if (user != null) {
             if (Utils.comparePwd(password, user.getPassword())) {
-                tokenManager.deleteToken("token:"+account);
                 userMapper.updateLastLoginTime(user.getIdUser());
                 userMapper.updateLastOnlineTimeByAccount(user.getAccount());
                 TokenUser tokenUser = new TokenUser();
-
                 String token = tokenManager.createToken(user.getAccount());
+
                 if(token==null){
                     UserRolesDTO roles_res = this.findRolesByAccount(user.getAccount());
                     token = tokenManager.createToken(roles_res);
                 }
                 tokenUser.setToken(token);
-
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
-                redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
-//                loginRecordService.saveLoginRecord(user.getIdUser());
+                redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(user.getAccount(), JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
                 return tokenUser;
             }
         }
@@ -155,20 +153,19 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 }
             }
             if (isTopop&&Utils.comparePwd(password, user.getPassword())) {
-                tokenManager.deleteToken("token:"+account);
                 userMapper.updateLastLoginTime(user.getIdUser());
                 userMapper.updateLastOnlineTimeByAccount(user.getAccount());
                 TokenUser tokenUser = new TokenUser();
-
                 String token = tokenManager.createToken(user.getAccount());
+
                 if(token==null){
                     UserRolesDTO roles_res = this.findRolesByAccount(user.getAccount());
                     token = tokenManager.createToken(roles_res);
                 }
-                tokenUser.setToken(token);
 
+                tokenUser.setToken(token);
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
-                redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
+                redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(user.getAccount(), JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
                 return tokenUser;
             }
         }
@@ -297,21 +294,36 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     }
 
 
+
     @Override
     public TokenUser refreshToken(String refreshToken) {
         String account = redisTemplate.boundValueOps("Refresh_Token:"+refreshToken).get();
+        log.warn(account);
+
         if (StringUtils.isNotBlank(account)) {
+            UserRolesDTO userroles = tokenManager.getRoles(account);
             User nucleicUser = userMapper.selectByAccount(account);
             if (nucleicUser != null) {
                 TokenUser tokenUser = new TokenUser();
-                tokenUser.setToken(tokenManager.createToken(nucleicUser.getAccount()));
+
+                if(userroles!=null){
+                    tokenManager.deleteToken(account);
+                    tokenUser.setToken(tokenManager.createToken(userroles));
+                }else{
+                    UserRolesDTO roles_res = this.findRolesByAccount(account);
+                    log.warn(roles_res.getId());
+                    tokenUser.setToken(tokenManager.createToken(roles_res));
+                }
+
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
 
                 redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
-                redisTemplate.delete(refreshToken);
+
+                redisTemplate.delete("Refresh_Token:"+ refreshToken);
                 return tokenUser;
             }
         }
+
         log.warn("显然没有找到对应用户");
         throw new UnauthorizedException();
     }
@@ -325,7 +337,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 permissions.add(role.getInputCode());
             }
         }
-        permissions.add("user");
         return permissions;
     }
 
