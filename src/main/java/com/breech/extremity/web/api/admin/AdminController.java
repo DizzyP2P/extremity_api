@@ -84,8 +84,8 @@ public class AdminController {
     }
 
     @GetMapping("/user/get-by-role-ids")  // 根据ID列表返回对应用户
-    public GlobalResult<Map<Integer, List<UserDTO>>> getGroupedUsersByRoleIds(@RequestParam List<Integer> ids) throws Exception {
-        Map<Integer, List<UserDTO>> groupedUsers = userService.getGroupedUsersByRoleList(ids);
+    public GlobalResult<Map<String, List<UserDTO>>> getGroupedUsersByRoleIds(@RequestParam List<Integer> ids) throws Exception {
+        Map<String, List<UserDTO>> groupedUsers = userService.getGroupedUsersByRoleList(ids);
         return GlobalResultGenerator.genSuccessResult(groupedUsers);
     }
 

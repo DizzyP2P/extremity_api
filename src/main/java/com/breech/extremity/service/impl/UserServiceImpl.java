@@ -346,14 +346,14 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     }
 
     @Override
-    public Map<Integer,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds){
+    public Map<String,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds){
         // Service 负责实现具体逻辑
         // 使用一个 Map 来存储角色ID对应的用户列表
-        Map<Integer, List<UserDTO>> result = new HashMap<>();
+        Map<String, List<UserDTO>> result = new HashMap<>();
 
         for (Integer roleId : roleIds) {
             List<UserDTO> users = userMapper.getUsersByRoleId(roleId);
-            result.put(roleId, users);
+            result.put(roleId.toString(), users);
         }
         // 返回所有角色对应的用户数据
         return result;
