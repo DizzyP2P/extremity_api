@@ -1,5 +1,6 @@
 package com.breech.extremity.web.api.admin;
 
+import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.breech.extremity.core.exception.ServiceException;
@@ -20,6 +21,7 @@ import java.util.List;
 /**
  * @author ronger
  */
+@RolesAllowed({1})
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -80,6 +82,10 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-//    @GetMapping("")
-//    public
+    @GetMapping("/user/get-by-role-list")  // 根据ID列表返回对应角色
+    public GlobalResult<Boolean> getUsersByRoleLst(@RequestParam List<Integer> ids) throws Exception {
+
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
 }
