@@ -2,10 +2,12 @@ package com.breech.extremity.service.impl;
 
 import com.breech.extremity.core.exception.ServiceException;
 import com.breech.extremity.core.service.AbstractService;
+import com.breech.extremity.mapper.ArticleMapper;
 import com.breech.extremity.mapper.RoleMapper;
 import com.breech.extremity.model.Role;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.RoleService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

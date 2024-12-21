@@ -24,15 +24,6 @@ public interface UserMapper extends Mapper<User> {
     User selectByAccount(@Param("account") String account);
 
     /**
-     * 添加用户权限
-     *
-     * @param idUser
-     * @param idRole
-     * @return
-     */
-    Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
-
-    /**
      * 根据账号获取获取用户信息
      *
      * @param account
@@ -186,4 +177,17 @@ public interface UserMapper extends Mapper<User> {
      * @return
      */
     Integer selectCountByAccount(@Param("account") String account);
+
+    List<UserDTO> getUsersByRoleId(@Param("roleId") Integer roleId);
+
+    boolean addUser(@Param("user") User user, @Param("idRole") Integer idRole);
+
+    /**
+     * 添加用户权限
+     *
+     * @param idUser
+     * @param idRole
+     * @return
+     */
+    Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
 }

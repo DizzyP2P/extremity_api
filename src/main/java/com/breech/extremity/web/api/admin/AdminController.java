@@ -1,5 +1,6 @@
 package com.breech.extremity.web.api.admin;
 
+import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.breech.extremity.core.exception.ServiceException;
@@ -16,10 +17,12 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ronger
  */
+@RolesAllowed({1})
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -80,6 +83,16 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-//    @GetMapping("")
-//    public
+    @GetMapping("/user/get-by-role-ids")  // 根据ID列表返回对应用户
+    public GlobalResult<Map<Integer, List<UserDTO>>> getGroupedUsersByRoleIds(@RequestParam List<Integer> ids) throws Exception {
+        Map<Integer, List<UserDTO>> groupedUsers = userService.getGroupedUsersByRoleList(ids);
+        return GlobalResultGenerator.genSuccessResult(groupedUsers);
+    }
+
+    @GetMapping("/user/add-user") // 创建用户 + 授权
+    public GlobalResult<Boolean> addUser(@RequestBody User user, @RequestParam Integer idRole) throws Exception{
+        boolean flag = userService.addUser(user, idRole);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
 }
