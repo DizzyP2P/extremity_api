@@ -2,8 +2,11 @@ package com.breech.extremity.web.api.auth;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.breech.extremity.auth.TokenManager;
+import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.breech.extremity.core.exception.AccountExistsException;
+import com.breech.extremity.core.exception.BusinessException;
 import com.breech.extremity.core.exception.ServiceException;
+import com.breech.extremity.core.exception.UnknownAccountException;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.core.response.NormalResponseMessage;
@@ -15,8 +18,6 @@ import com.breech.extremity.service.JavaMailService;
 import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.BeanCopierUtil;
 import com.breech.extremity.util.UserUtils;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -78,6 +79,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @RolesAllowed({5})
     public GlobalResult logout() {
         User user = UserUtils.getCurrentUserByToken();
         if (Objects.nonNull(user)) {

@@ -10,6 +10,7 @@ public interface RedisService {
      * NX: 当且仅当缓存中特定的key不存在时设定数据
      */
     String NXXX_SET_IF_NOT_EXISTS = "nx";
+
     /**
      * XX: 当且仅当缓存中特定的key存在时设定数据
      */
