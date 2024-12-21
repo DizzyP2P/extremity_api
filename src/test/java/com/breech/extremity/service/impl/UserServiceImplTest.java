@@ -25,10 +25,10 @@ class UserServiceImplTest {
     private RoleMapper roleMapper;
     @Test
     void createUser() {
-       String email = "pigremaaaa@163.com";
+       String email = "admin@163.com";
        User user = new User();
        String nickname = email.split("@")[0];
-       String password = "12345678";
+       String password = "123";
        user.setNickname(nickname);
        user.setAccount(nickname);
        user.setEmail(email);
