@@ -24,14 +24,13 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/admin")
-@RequiresRoles(value = {"topop"})
 public class AdminController {
     @Resource
     private UserService userService;
     @Resource
     private RoleService roleService;
 
-    @GetMapping("/users")
+    @GetMapping("/users")  // 所有用户 所有角色都返回
     public GlobalResult<PageInfo<UserInfoDTO>> users(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer rows, UserSearchDTO searchDTO) {
         PageHelper.startPage(page, rows);
         List<UserInfoDTO> list = userService.findUsers(searchDTO);
@@ -39,13 +38,13 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(pageInfo);
     }
 
-    @GetMapping("/user/{idUser}/role")
+    @GetMapping("/user/{idUser}/role")  // 根据用户ID获取用户角色role
     public GlobalResult<List<Role>> userRole(@PathVariable Long idUser) {
         List<Role> roles = roleService.findByIdUser(idUser);
         return GlobalResultGenerator.genSuccessResult(roles);
     }
 
-    @GetMapping("/roles")
+    @GetMapping("/roles")  // 获取所有角色列表 就是roles中的数据 甚至可以新增角色
     public GlobalResult<PageInfo<Role>> roles(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer rows) {
         PageHelper.startPage(page, rows);
         List<Role> list = roleService.findAll();
@@ -53,33 +52,36 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(pageInfo);
     }
 
-    @PatchMapping("/user/update-role")
+    @PatchMapping("/user/update-role")  // 更新用户角色
     public GlobalResult<Boolean> updateUserRole(@RequestBody UserRoleDTO userRole) throws ServiceException {
         boolean flag = userService.updateUserRole(userRole.getIdUser(), userRole.getIdRole());
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-    @PatchMapping("/user/update-status")
+    @PatchMapping("/user/update-status")  // 更新用户状态
     public GlobalResult<Boolean> updateUserStatus(@RequestBody User user) throws ServiceException {
         boolean flag = userService.updateStatus(user.getIdUser(), user.getStatus());
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-    @PatchMapping("/role/update-status")
+    @PatchMapping("/role/update-status")  // 更新角色状态
     public GlobalResult<Boolean> updateRoleStatus(@RequestBody Role role) throws ServiceException {
         boolean flag = roleService.updateStatus(role.getIdRole(), role.getStatus());
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-    @PostMapping("/role/post")
+    @PostMapping("/role/post")  // 添加角色
     public GlobalResult<Boolean> addRole(@RequestBody Role role) throws ServiceException {
         boolean flag = roleService.saveRole(role);
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-    @PutMapping("/role/post")
+    @PutMapping("/role/post")  // 更新角色信息
     public GlobalResult<Boolean> updateRole(@RequestBody Role role) throws Exception {
         boolean flag = roleService.saveRole(role);
         return GlobalResultGenerator.genSuccessResult(flag);
     }
+
+//    @GetMapping("")
+//    public
 }

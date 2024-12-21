@@ -14,7 +14,7 @@ import java.util.Date;
 
 @Table(name = "extremity_user")
 
-@Data
+@Data // 四类用户
 public class User implements Serializable, Cloneable {
     @Id
     @Column(name = "id")
