@@ -31,7 +31,7 @@ public class PermissionAspect {
     @Autowired
     TokenManager tokenManager;
 
-    @Before("@annotation(com.breech.extremity.auth.annotation.RolesAllowed)")
+    @Before("@within(com.breech.extremity.auth.annotation.RolesAllowed)||@annotation(com.breech.extremity.auth.annotation.RolesAllowed)")
     public void before(JoinPoint joinPoint) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes != null ? attributes.getRequest() : null;
@@ -45,12 +45,20 @@ public class PermissionAspect {
         if(token==null){
             throw new UnauthorizedException();//抛出[权限不足]的异常
         }
-        Signature signature = joinPoint.getSignature();
-        MethodSignature methodSignature = (MethodSignature) signature;
-        RolesAllowed rolesAllowed  = methodSignature.getMethod().getAnnotation(RolesAllowed.class);
+        // 获取类上的 RolesAllowed 注解
+        RolesAllowed classRolesAllowed = joinPoint.getTarget().getClass().getAnnotation(RolesAllowed.class);
+
+        // 获取方法上的 RolesAllowed 注解
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        RolesAllowed methodRolesAllowed = methodSignature.getMethod().getAnnotation(RolesAllowed.class);
+
+        // 合并类和方法的权限设置
+        RolesAllowed rolesAllowed = methodRolesAllowed != null ? methodRolesAllowed : classRolesAllowed;
+
         int[] roles = rolesAllowed.value();
         log.debug("校验权限code: {}", Arrays.toString(roles));
         UserRolesDTO userRolesDTO;
+
 
         userRolesDTO = tokenManager.getRolesByToken(token);
         if(userRolesDTO==null){

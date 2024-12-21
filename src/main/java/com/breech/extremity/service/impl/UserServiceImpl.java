@@ -141,7 +141,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 return tokenUser;
             }
         }
-        throw new AuthenticationException();
+        throw new AccountErrorException();
     }
 
     @Override

@@ -2,9 +2,11 @@ package com.breech.extremity.web.api.auth;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.breech.extremity.auth.TokenManager;
+import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.breech.extremity.core.exception.AccountExistsException;
 import com.breech.extremity.core.exception.BusinessException;
 import com.breech.extremity.core.exception.ServiceException;
+import com.breech.extremity.core.exception.UnknownAccountException;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.core.response.NormalResponseMessage;
@@ -77,6 +79,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @RolesAllowed({5})
     public GlobalResult logout() {
         User user = UserUtils.getCurrentUserByToken();
         if (Objects.nonNull(user)) {
@@ -100,7 +103,7 @@ public class AuthController {
                 throw new ServiceException(NormalResponseMessage.SEND_FAIL.getMessage());
             }
         } else {
-            throw new BusinessException("未知账号");
+            throw new UnknownAccountException("未知账号");
         }
         return GlobalResultGenerator.genSuccessResult(NormalResponseMessage.SEND_SUCCESS.getMessage());
     }
