@@ -28,7 +28,6 @@ import java.util.Map;
 public class BaseExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(BaseExceptionHandler.class);
-
     @SuppressWarnings("Duplicates")
     @ExceptionHandler(Exception.class)
     public Object errorHandler(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
@@ -68,6 +67,7 @@ public class BaseExceptionHandler {
                 String message = getString(request, handler, ex);
                 logger.error(message, ex);
             }
+            response.setStatus(200);
             result.setSuccess(false);
             return result;
         } else {
@@ -112,6 +112,7 @@ public class BaseExceptionHandler {
                 attributes.put("message", NormalResponseCode.INTERNAL_SERVER_ERROR.getMessage());
             }
             attributes.put("success", false);
+            response.setStatus(200);
             view.setAttributesMap(attributes);
             mv.setView(view);
             return mv;

@@ -121,9 +121,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         log.warn(account+password);
         if (user != null) {
             if (Utils.comparePwd(password, user.getPassword())) {
-                redisTemplate.delete("Refresh_Token:"+account);
                 tokenManager.deleteToken("token:"+account);
-
                 userMapper.updateLastLoginTime(user.getIdUser());
                 userMapper.updateLastOnlineTimeByAccount(user.getAccount());
                 TokenUser tokenUser = new TokenUser();
@@ -136,7 +134,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 tokenUser.setToken(token);
 
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
-                redisTemplate.boundValueOps(tokenUser.getRefreshToken()).set("Refresh_Token:"+ account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
+                redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
 //                loginRecordService.saveLoginRecord(user.getIdUser());
                 return tokenUser;
             }
@@ -157,9 +155,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 }
             }
             if (isTopop&&Utils.comparePwd(password, user.getPassword())) {
-                redisTemplate.delete("Refresh_Token:"+account);
                 tokenManager.deleteToken("token:"+account);
-
                 userMapper.updateLastLoginTime(user.getIdUser());
                 userMapper.updateLastOnlineTimeByAccount(user.getAccount());
                 TokenUser tokenUser = new TokenUser();
@@ -172,7 +168,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 tokenUser.setToken(token);
 
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
-                redisTemplate.boundValueOps(tokenUser.getRefreshToken()).set("Refresh_Token:"+account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
+                redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
                 return tokenUser;
             }
         }
@@ -303,18 +299,20 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
 
     @Override
     public TokenUser refreshToken(String refreshToken) {
-        String account = redisTemplate.boundValueOps(refreshToken).get();
+        String account = redisTemplate.boundValueOps("Refresh_Token:"+refreshToken).get();
         if (StringUtils.isNotBlank(account)) {
             User nucleicUser = userMapper.selectByAccount(account);
             if (nucleicUser != null) {
                 TokenUser tokenUser = new TokenUser();
                 tokenUser.setToken(tokenManager.createToken(nucleicUser.getAccount()));
                 tokenUser.setRefreshToken(UlidCreator.getUlid().toString());
+
                 redisTemplate.boundValueOps("Refresh_Token:"+tokenUser.getRefreshToken()).set(account, JwtConstants.REFRESH_TOKEN_EXPIRES_HOUR, TimeUnit.HOURS);
                 redisTemplate.delete(refreshToken);
                 return tokenUser;
             }
         }
+        log.warn("显然没有找到对应用户");
         throw new UnauthorizedException();
     }
 

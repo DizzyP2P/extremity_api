@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+
 public class AuthorizationFilter extends OncePerRequestFilter {
 
     @Resource
@@ -41,6 +42,9 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         // 从请求头中提取 Token
         String token = request.getHeader("Authorization");
+
+        logger.info("处理token {}" + token);
+
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // 去掉 "Bearer " 前缀
             if(tokenManager.ifExistToken(token)) {
@@ -80,6 +84,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             }
         }
         // 继续处理下一个 Filter 或 Controller
+        logger.info("token处理正常");
         filterChain.doFilter(request, response);
     }
 }
