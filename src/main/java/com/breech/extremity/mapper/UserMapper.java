@@ -190,4 +190,8 @@ public interface UserMapper extends Mapper<User> {
      * @return
      */
     Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
+
+    void updateByEmail(User user);
+
+    User selectByEmail(String email);
 }

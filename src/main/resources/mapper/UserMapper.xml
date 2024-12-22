@@ -142,4 +142,30 @@
     <insert id="insertUserRole">
         insert into extremity_user_role (id_user,id_role,created_time) values (#{idUser},#{idRole},sysdate())
     </insert>
+
+    <update id="updateByEmail" parameterType="com.breech.extremity.model.User">
+        update extremity_user
+        <set>
+            <if test="realName != null and realName != ''">
+                real_name = #{realName},
+            </if>
+            <if test="account != null and account != ''">
+                account = #{account},
+            </if>
+            <if test="sex != null and sex != ''">
+                sex = #{sex},
+            </if>
+            <if test="avatarUrl != null and avatarUrl != ''">
+                avatar_url = #{avatarUrl},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone}
+            </if>
+        </set>
+        where email = #{email}
+    </update>
+    <select id="selectByEmail" parameterType="string" resultType="com.breech.extremity.model.User">
+        select * FROM extremity_user where email=#{email}
+    </select>
+
 </mapper>

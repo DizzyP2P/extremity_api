@@ -374,4 +374,13 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
             return false;
         }
     }
+
+    @Override
+    public void updateUser(User user){
+         userMapper.updateByEmail(user);
+    }
+    @Override
+    public User getUserByEmail(String email){
+        return userMapper.selectByEmail(email);
+    }
 }

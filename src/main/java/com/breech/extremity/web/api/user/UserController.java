@@ -31,39 +31,65 @@ public class UserController {
     private UserService userService;
     @GetMapping("/email")
     public GlobalResult<User> findUserDTOByEmail(@RequestParam("email") String email) {
-        User user=userService.findByAccount(email);
+        User user=userService.getUserByEmail(email);
         return GlobalResultGenerator.genSuccessResult(user);
     }
 
 
     @PostMapping("/upload-avatar")
-    public ResponseEntity<String> uploadAvatar(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "没有选择文件");
-        }
-
-        // 获取文件名
-        String fileName = file.getOriginalFilename();
-        if (fileName == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "文件名无效");
-        }
-
-        // 创建存储文件的目录（如果没有的话）
-        File uploadDir = new File(fileDownloadUrl);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-
-        // 设置文件保存路径
-        File serverFile = new File(uploadDir, fileName);
-        logger.warn(String.valueOf(serverFile));
+    public GlobalResult<String> uploadAvatar(@RequestParam(value = "file", required = false) MultipartFile file,
+                                               @RequestParam("account") String account,
+                                               @RequestParam("name") String name,
+                                               @RequestParam("sex") String sex,
+                                               @RequestParam("phone") String phone,
+                                               @RequestParam("email") String email) {
         try {
-            UserInfoDTO userInfoDTO = new UserInfoDTO();
+            if (file == null || file.isEmpty()) {
 
-            file.transferTo(serverFile);
-            return ResponseEntity.ok("头像上传成功");
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "文件保存失败", e);
+                User user = new User();
+                if(account!=null){
+                    user.setAccount(account);
+                }
+
+                user.setRealName(name);
+                user.setSex(sex);
+                user.setPhone(phone);
+                user.setEmail(email);
+                userService.updateUser(user);
+                return GlobalResultGenerator.genSuccessResult("ok");
+            }
+            // 获取文件名
+            String fileName = file.getOriginalFilename();
+            if (fileName == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "文件名无效");
+            }
+
+            // 创建存储文件的目录（如果没有的话）
+            File uploadDir = new File(fileDownloadUrl);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            // 设置文件保存路径
+            File serverFile = new File(uploadDir, fileName);
+            logger.warn(String.valueOf(serverFile));
+            try {
+                User user = new User();
+                user.setAvatarUrl(serverFile.getAbsolutePath());
+                if(account!=null){
+                    user.setAccount(account);
+                }
+                user.setRealName(name);
+                user.setSex(sex);
+                user.setPhone(phone);
+                file.transferTo(serverFile);
+                userService.updateUser(user);
+                return GlobalResultGenerator.genSuccessResult("ok");
+            } catch (IOException e) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "文件保存失败", e);
+            }
+        }catch (Exception e) {
+            return GlobalResultGenerator.genErrorResult("更新信息失败");
         }
     }
 }

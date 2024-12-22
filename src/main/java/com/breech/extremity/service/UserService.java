@@ -199,4 +199,7 @@ public interface UserService extends Service<User> {
     Map<Integer,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
 
     boolean addUser(User user, Integer roleId);
+
+    void updateUser(User user);
+    User getUserByEmail(String email);
 }
