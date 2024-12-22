@@ -192,7 +192,6 @@ public interface UserService extends Service<User> {
 
     boolean grantUserRole(Long idUser, Integer idRole) throws ServiceException;
     boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException;
-    boolean addUser(User user, Integer roleId);
 
     void updateUser(User user);
     User getUserByEmail(String email);
