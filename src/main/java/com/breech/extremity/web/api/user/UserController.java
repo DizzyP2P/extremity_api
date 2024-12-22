@@ -23,6 +23,8 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+
+    @Value("${resource.file-download-url}")
     private String fileDownloadUrl;
     private static final Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
 
@@ -49,10 +51,16 @@ public class UserController {
                 if(account!=null){
                     user.setAccount(account);
                 }
+                if(name!=null){
+                    user.setRealName(name);
+                }
+                if(phone!=null){
+                    user.setPhone(phone);
+                }
+                if(sex!=null){
+                    user.setSex(sex);
+                }
 
-                user.setRealName(name);
-                user.setSex(sex);
-                user.setPhone(phone);
                 user.setEmail(email);
                 userService.updateUser(user);
                 return GlobalResultGenerator.genSuccessResult("ok");
@@ -62,25 +70,42 @@ public class UserController {
             if (fileName == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "文件名无效");
             }
-
             // 创建存储文件的目录（如果没有的话）
             File uploadDir = new File(fileDownloadUrl);
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
+            User existingUser = userService.getUserByEmail(email);  // 获取用户信息
+            String oldAvatarUrl = existingUser.getAvatarUrl();  // 获取旧头像文件名
 
+            // 如果用户有旧头像文件，则删除它
+            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+                File oldFile = new File(uploadDir, oldAvatarUrl);
+                if (oldFile.exists()) {
+                    boolean deleted = oldFile.delete();
+                    if (!deleted) {
+                        logger.error("删除旧头像文件失败: " + oldAvatarUrl);
+                    }
+                }
+            }
             // 设置文件保存路径
             File serverFile = new File(uploadDir, fileName);
-            logger.warn(String.valueOf(serverFile));
             try {
                 User user = new User();
-                user.setAvatarUrl(serverFile.getAbsolutePath());
+                user.setAvatarUrl(fileName);
                 if(account!=null){
                     user.setAccount(account);
                 }
-                user.setRealName(name);
-                user.setSex(sex);
-                user.setPhone(phone);
+                if(name!=null){
+                    user.setRealName(name);
+                }
+                if(phone!=null){
+                    user.setPhone(phone);
+                }
+                if(sex!=null){
+                    user.setSex(sex);
+                }
+                user.setEmail(email);
                 file.transferTo(serverFile);
                 userService.updateUser(user);
                 return GlobalResultGenerator.genSuccessResult("ok");
@@ -88,6 +113,7 @@ public class UserController {
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "文件保存失败", e);
             }
         }catch (Exception e) {
+            e.printStackTrace();
             return GlobalResultGenerator.genErrorResult("更新信息失败");
         }
     }

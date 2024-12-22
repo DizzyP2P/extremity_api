@@ -114,7 +114,7 @@ public class JavaMailServiceImpl implements JavaMailService {
             return 1;
         } else if (type == 1) {
             String code = Utils.entryptPassword(to);
-            String url = BASE_URL+ "/forget-password?code=" + code;
+            String url = BASE_URL+ "/" + code;
             redisService.set(code, to, 15 * 60);
             String thymeleafTemplatePath = "mail/forgetPasswordTemplate";
             thymeleafTemplateVariable.put("url", url);

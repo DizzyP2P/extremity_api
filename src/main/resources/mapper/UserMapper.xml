@@ -170,12 +170,13 @@
                 avatar_url = #{avatarUrl},
             </if>
             <if test="phone != null and phone != ''">
-                phone = #{phone}
+                phone = #{phone},
             </if>
+            email = #{email}
         </set>
         where email = #{email}
     </update>
-    <select id="selectByEmail" parameterType="string" resultType="com.breech.extremity.model.User">
+    <select id="selectByEmail" parameterType="string" resultMap="BaseResultMap">
         select * FROM extremity_user where email=#{email}
     </select>
 

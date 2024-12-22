@@ -81,6 +81,8 @@ public class WebMvcConfigurer extends WebMvcConfigurationSupport {
                 .addResourceLocations("classpath:/META-INF/resources/webjars/");
         //将所有/static/** 访问都映射到classpath:/static/ 目录下
         registry.addResourceHandler("/static/**").addResourceLocations(ResourceUtils.CLASSPATH_URL_PREFIX + "/static/");
+        registry.addResourceHandler("/image/**").addResourceLocations(ResourceUtils.FILE_URL_PREFIX + "./image/");
         super.addResourceHandlers(registry);
     }
 }
+
