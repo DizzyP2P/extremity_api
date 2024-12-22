@@ -54,7 +54,6 @@ public class Utils {
         Integer code = (int) ((Math.random() * 9 + 1) * 100000);
         return code;
     }
-
     /**
      * 获取配置文件内属性
      *

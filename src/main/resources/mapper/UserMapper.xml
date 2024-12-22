@@ -84,6 +84,7 @@
     <select id="selectByAccount" resultMap="BaseResultMap">
         select id, nickname, account, password, status, avatar_type, avatar_url, email from extremity_user where (account = #{account} or email = #{account} ) and status = 0
     </select>
+
     <select id="findUserInfoByAccount" resultMap="UserInfoResultMapper">
         select id, nickname, sex, avatar_type, avatar_url, email, phone, account, status, signature, last_login_time, last_online_time from extremity_user where account = #{account}
     </select>
@@ -125,7 +126,7 @@
 
     <select id="getUsersByRoleId" resultMap="DTOResultMapper">
         SELECT
-            r.id, nickname, avatar_type, avatar_url, account, signature, bg_img_url
+            u.id, nickname, avatar_type, avatar_url, account, signature, bg_img_url
         FROM
             extremity_user u
                 JOIN

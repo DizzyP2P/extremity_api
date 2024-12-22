@@ -20,6 +20,7 @@ public class UserUtils {
 
     private static final UserMapper userMapper = SpringContextHolder.getBean(UserMapper.class);
     private static final TokenManager tokenManager = SpringContextHolder.getBean(TokenManager.class);
+
     public static User getCurrentUserByToken() {
         String account = (String)ContextHolderUtils.getRequest().getAttribute("account");
         if (StringUtils.isNotBlank(account)) {

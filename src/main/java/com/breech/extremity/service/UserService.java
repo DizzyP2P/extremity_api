@@ -196,7 +196,7 @@ public interface UserService extends Service<User> {
      * @return user_list
      *
     */
-    Map<Integer,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
+    Map<String,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
 
     boolean addUser(User user, Integer roleId);
 
