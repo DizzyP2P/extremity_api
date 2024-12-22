@@ -21,9 +21,9 @@ spring:
 
   datasource:
     druid:
-      url: jdbc:mysql://localhost:3306/extremity?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+      url: jdbc:mysql://localhost:3305/extremity?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
       username: root
-      password: root
+      password: ly5201314.
       driver-class-name: com.mysql.cj.jdbc.Driver
 
       # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
@@ -62,4 +62,5 @@ server:
   max-http-header-size: 1048576
   shutdown: graceful
 resource:
-  domain: localhost:8080 #  网站域名，本地测试时填写前端项目访问地址即可
+  domain: localhost:3000/frontend/forgetPassword #  网站域名，本地测试时填写前端项目访问地址即可
+  file-download-url: C:\Users\Duhao\Desktop\java web\design\extremity_api\image # 文件下载地址
