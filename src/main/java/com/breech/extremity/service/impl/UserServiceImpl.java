@@ -193,16 +193,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateUserRole(Long idUser, Long idRole) throws ServiceException {
-        Integer result = userMapper.updateUserRole(idUser, idRole);
-        if (result == 0) {
-            throw new ServiceException("更新失败!");
-        }
-        return true;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean updateStatus(Long idUser, String status) throws ServiceException {
         Integer result = userMapper.updateStatus(idUser, status);
         if (result == 0) {
@@ -361,27 +351,21 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addUser(User user, Integer roleId){
-        try {
-            // 1. 插入用户
-            userMapper.addUser(user, roleId);
-
-            // 2. 获取用户ID
-            Long userId = user.getIdUser();
-            if (userId == null) {
-                throw new RuntimeException("用户插入失败");
-            }
-
-            // 4. 插入用户角色
-            int rowsAffected = userMapper.insertUserRole(userId, roleId);
-            if (rowsAffected <= 0) {
-                // 5. 如果插入用户角色失败，抛出异常
-                throw new RuntimeException("插入用户角色失败");
-            }
-            return true;
-        } catch (Exception e) {
+    public boolean addUser(User user){
+        if(userMapper.selectUserDTOByAccount(user.getAccount()) != null){
             return false;
         }
+        return userMapper.addUser(user);
+    }
+
+    @Override
+    public boolean grantUserRole(Long idUser, Integer idRole) throws ServiceException{
+        return userMapper.grantUserRole(idUser, idRole);
+    }
+
+    @Override
+    public boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException{
+        return userMapper.revokeUserRole(idUser, idRole);
     }
 
     @Override
