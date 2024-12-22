@@ -124,4 +124,28 @@ public class User implements Serializable, Cloneable {
      */
     @Column(name = "bg_img_url")
     private String bgImgUrl;
+
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "idUser=" + idUser +
+                ", account='" + account + '\'' +
+                ", password='" + password + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", realName='" + realName + '\'' +
+                ", sex='" + sex + '\'' +
+                ", avatarType='" + avatarType + '\'' +
+                ", avatarUrl='" + avatarUrl + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", signature='" + signature + '\'' +
+                ", status='" + status + '\'' +
+                ", lastLoginTime=" + lastLoginTime +
+                ", createdTime=" + createdTime +
+                ", updatedTime=" + updatedTime +
+                ", lastOnlineTime=" + lastOnlineTime +
+                ", bgImgUrl='" + bgImgUrl + '\'' +
+                '}';
+    }
 }

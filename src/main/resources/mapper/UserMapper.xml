@@ -58,9 +58,7 @@
     <update id="updatePasswordByEmail">
         update extremity_user set password = #{password} where email = #{email}
     </update>
-    <update id="updateUserRole">
-        update extremity_user_role set id_role = #{idRole},created_time = sysdate() where id_user = #{idUser}
-    </update>
+
     <update id="updateStatus">
         update extremity_user set status = #{status} where id = #{idUser}
     </update>
@@ -89,7 +87,7 @@
         select id, nickname, sex, avatar_type, avatar_url, email, phone, account, status, signature, last_login_time, last_online_time from extremity_user where account = #{account}
     </select>
     <select id="selectUserDTOByAccount" resultMap="DTOResultMapper">
-        select id, nickname, avatar_type, avatar_url, account, signature, bg_img_url from extremity_user where account = #{account} and status = 0
+        select id, nickname, avatar_type, avatar_url, account, signature, bg_img_url from extremity_user where account = #{account}
     </select>
     <select id="selectRoleWeightsByUser" resultType="java.lang.Integer">
         select vr.weights from extremity_role vr left join extremity_user_role vur on vr.id = vur.id_role where vur.id_user = #{idUser}
@@ -136,11 +134,23 @@
         WHERE
             r.id = #{roleId};
     </select>
-    <insert id="addUser" useGeneratedKeys="true" keyProperty="id" parameterType="com.breech.extremity.model.User">
+    <insert id="addUser" parameterType="com.breech.extremity.model.User">
         INSERT INTO extremity_user (account, password, nickname, sex, avatar_type, avatar_url, email, phone, status, created_time, updated_time)
-        VALUES (#{account}, #{password}, #{nickname}, #{sex}, #{avatarType}, #{avatarUrl}, #{email}, #{phone}, #{status}, NOW(), NOW());
+        VALUES (#{user.account}, #{user.password}, #{user.nickname}, #{user.sex}, #{user.avatarType}, #{user.avatarUrl}, #{user.email}, #{user.phone}, #{user.status}, NOW(), NOW());
     </insert>
     <insert id="insertUserRole">
         insert into extremity_user_role (id_user,id_role,created_time) values (#{idUser},#{idRole},sysdate())
     </insert>
+
+    <!-- 为用户授予角色 -->
+    <insert id="grantUserRole">
+        INSERT INTO extremity_user_role (id_user, id_role, created_time)
+        VALUES (#{idUser}, #{idRole}, NOW())
+    </insert>
+
+    <!-- 撤销用户角色 -->
+    <delete id="revokeUserRole">
+        DELETE FROM extremity_user_role
+        WHERE id_user = #{idUser} AND id_role = #{idRole}
+    </delete>
 </mapper>

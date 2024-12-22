@@ -11,5 +11,5 @@ public class UserRoleDTO {
 
     private Long idUser;
 
-    private Long idRole;
+    private Integer idRole;
 }

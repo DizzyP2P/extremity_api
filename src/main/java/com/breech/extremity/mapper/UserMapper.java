@@ -57,15 +57,6 @@ public interface UserMapper extends Mapper<User> {
     Integer selectRoleWeightsByUser(@Param("idUser") Long idUser);
 
     /**
-     * 更新用户权限
-     *
-     * @param idUser
-     * @param idRole
-     * @return
-     */
-    Integer updateUserRole(@Param("idUser") Long idUser, @Param("idRole") Long idRole);
-
-    /**
      * 更新用户状态
      *
      * @param idUser
@@ -180,7 +171,7 @@ public interface UserMapper extends Mapper<User> {
 
     List<UserDTO> getUsersByRoleId(@Param("roleId") Integer roleId);
 
-    boolean addUser(@Param("user") User user, @Param("idRole") Integer idRole);
+    boolean addUser(@Param("user") User user);
 
     /**
      * 添加用户权限
@@ -190,4 +181,23 @@ public interface UserMapper extends Mapper<User> {
      * @return
      */
     Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
+
+    /**
+     * 为用户授予角色
+     *
+     * @param idUser 用户ID
+     * @param idRole 角色ID
+     * @return 操作是否成功
+     */
+    boolean grantUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
+
+    /**
+     * 撤销用户角色
+     *
+     * @param idUser 用户ID
+     * @param idRole 角色ID
+     * @return 操作是否成功
+     */
+    boolean revokeUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
+
 }

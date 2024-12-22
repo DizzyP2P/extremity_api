@@ -75,16 +75,6 @@ public interface UserService extends Service<User> {
     boolean forgetPassword(String code, String password) throws ServiceException;
 
     /**
-     * 更新用户角色接口
-     *
-     * @param idUser 用户 id
-     * @param idRole 角色 id
-     * @return Map
-     * @throws ServiceException
-     */
-    boolean updateUserRole(Long idUser, Long idRole) throws ServiceException;
-
-    /**
      * 更新用户状态
      *
      * @param idUser 用户 id
@@ -198,5 +188,8 @@ public interface UserService extends Service<User> {
     */
     Map<String,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
 
-    boolean addUser(User user, Integer roleId);
+    boolean addUser(User user);
+
+    boolean grantUserRole(Long idUser, Integer idRole) throws ServiceException;
+    boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException;
 }

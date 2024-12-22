@@ -10,6 +10,10 @@
         <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
     </resultMap>
+    <resultMap id="BaseRoleMap" type="com.breech.extremity.dto.admin.RolesDTO">
+        <id column="id" jdbcType="INTEGER" property="idRole"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+    </resultMap>
     <update id="updateStatus">
         update extremity_role set status = #{status},updated_time = sysdate() where id = #{idRole}
     </update>
@@ -24,5 +28,8 @@
     <select id="selectRoleByInputCode" resultMap="BaseResultMap">
         select * from extremity_role where input_code = #{inputCode}
     </select>
-
+    <select id="getAllRoles" resultMap="BaseRoleMap">
+        SELECT id, name
+        FROM extremity_role
+    </select>
 </mapper>
