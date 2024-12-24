@@ -62,10 +62,6 @@
     <update id="updateStatus">
         update extremity_user set status = #{status} where id = #{idUser}
     </update>
-    <update id="updateUserInfo">
-        update extremity_user set nickname = #{nickname},signature = #{signature},avatar_type = #{avatarType},avatar_url = #{avatarUrl},sex = #{sex}
-        where id = #{idUser}
-    </update>
     <update id="updateLastLoginTime">
         update extremity_user set last_login_time = sysdate() where id = #{idUser}
     </update>
@@ -86,8 +82,8 @@
     <select id="findUserInfoByAccount" resultMap="UserInfoResultMapper">
         select id, nickname, sex, avatar_type, avatar_url, email, phone, account, status, signature, last_login_time, last_online_time from extremity_user where account = #{account}
     </select>
-    <select id="selectUserDTOByAccount" resultMap="DTOResultMapper">
-        select id, nickname, avatar_type, avatar_url, account, signature, bg_img_url from extremity_user where account = #{account}
+    <select id="selectUserByAccountAndEmail" resultMap="BaseResultMap">
+        select id from extremity_user where account = #{account} OR email = #{email}
     </select>
     <select id="selectRoleWeightsByUser" resultType="java.lang.Integer">
         select vr.weights from extremity_role vr left join extremity_user_role vur on vr.id = vur.id_role where vur.id_user = #{idUser}
@@ -122,9 +118,10 @@
     </select>
 
 
-    <select id="getUsersByRoleId" resultMap="DTOResultMapper">
+    <!-- 根据roleId获取一组用户的简易信息 -->
+    <select id="getUsersByRoleId" resultMap="UserInfoResultMapper">
         SELECT
-            u.id, nickname, avatar_type, avatar_url, account, signature, bg_img_url
+            u.id, email, nickname, avatar_url, u.status
         FROM
             extremity_user u
                 JOIN
@@ -134,25 +131,59 @@
         WHERE
             r.id = #{roleId};
     </select>
-    <insert id="addUser" parameterType="com.breech.extremity.model.User">
+    <!-- 新建账号 -->
+    <insert id="addUser" useGeneratedKeys="true" keyProperty="idUser" parameterType="com.breech.extremity.model.User">
         INSERT INTO extremity_user (account, password, nickname, sex, avatar_type, avatar_url, email, phone, status, created_time, updated_time)
         VALUES (#{user.account}, #{user.password}, #{user.nickname}, #{user.sex}, #{user.avatarType}, #{user.avatarUrl}, #{user.email}, #{user.phone}, #{user.status}, NOW(), NOW());
     </insert>
+    <!-- 没测，mo useage -->
     <insert id="insertUserRole">
         insert into extremity_user_role (id_user,id_role,created_time) values (#{idUser},#{idRole},sysdate())
     </insert>
-
-    <!-- 为用户授予角色 -->
+    <!-- 为用户授予角色（团队管理员）（未激活） -->
     <insert id="grantUserRole">
-        INSERT INTO extremity_user_role (id_user, id_role, created_time)
-        VALUES (#{idUser}, #{idRole}, NOW())
+        INSERT INTO extremity_user_role (id_user, id_role, created_time, activated)
+        VALUES (#{idUser}, #{idRole}, NOW(), 0)
     </insert>
-
-    <!-- 撤销用户角色 -->
+    <!-- 撤销用户角色 no usage -->
     <delete id="revokeUserRole">
         DELETE FROM extremity_user_role
         WHERE id_user = #{idUser} AND id_role = #{idRole}
     </delete>
+    <!-- 删除账号 -->
+    <delete id="deleteUser">
+        DELETE FROM extremity_user
+        WHERE id = #{idUser}
+    </delete>
+    <!-- 显示用户详细信息 -->
+    <select id="showUserInfo" resultMap="UserInfoResultMapper">
+        SELECT
+            u.id, account, nickname, sex, avatar_url, email, phone, u.status, last_login_time, last_online_time, u.created_time, signature
+        FROM
+            extremity_user u
+        WHERE
+            u.id = #{idUser};
+    </select>
+    <!-- 根据用户ID修改用户信息 -->
+    <update id="updateUserInfo" parameterType="com.breech.extremity.dto.UserInfoDTO">
+        UPDATE extremity_user
+        SET
+            nickname = #{userInfoDTO.nickname},
+            email = #{userInfoDTO.email},
+            phone = #{userInfoDTO.phone},
+            status = #{userInfoDTO.status},
+            sex = #{userInfoDTO.sex},
+            signature = #{userInfoDTO.signature},
+            avatar_url = #{userInfoDTO.avatarUrl}
+        WHERE
+            id = #{userInfoDTO.idUser};
+    </update>
+
+
+
+
+
+
 
     <update id="updateByEmail" parameterType="com.breech.extremity.model.User">
         update extremity_user

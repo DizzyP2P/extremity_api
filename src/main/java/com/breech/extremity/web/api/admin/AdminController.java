@@ -2,23 +2,19 @@ package com.breech.extremity.web.api.admin;
 
 import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.breech.extremity.dto.admin.RolesDTO;
+import com.breech.extremity.dto.admin.UserRoleDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.breech.extremity.core.exception.ServiceException;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.dto.*;
-import com.breech.extremity.dto.admin.UserRoleDTO;
 import com.breech.extremity.model.*;
 
 import com.breech.extremity.service.*;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import retrofit2.http.Body;
 
 import javax.annotation.Resource;
-import javax.persistence.PostUpdate;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +38,7 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(pageInfo);
     }
 
-    @GetMapping("/user/{idUser}/role")  // 根据用户ID获取用户角色的全部role
+    @GetMapping("/user/{idUser}/role")  // 根据用户ID获取用户角色的role
     public GlobalResult<List<Role>> userRole(@PathVariable Long idUser) {
         List<Role> roles = roleService.findByIdUser(idUser);
         return GlobalResultGenerator.genSuccessResult(roles);
@@ -62,11 +58,23 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-//    @PatchMapping("/role/update-status")  // 更新角色状态
-//    public GlobalResult<Boolean> updateRoleStatus(@RequestBody Role role) throws ServiceException {
-//        boolean flag = roleService.updateStatus(role.getIdRole(), role.getStatus());
-//        return GlobalResultGenerator.genSuccessResult(flag);
-//    }
+    @GetMapping("/user/get-role")  // 没用了
+    public GlobalResult<UserRoleDTO> getRole(@RequestParam("idUser") Long idUser) {
+        UserRoleDTO userRole = roleService.getUserRoleByUserId(idUser);
+        return GlobalResultGenerator.genSuccessResult(userRole);
+    }
+
+    @GetMapping("/user/get-deactivate-role")
+    public GlobalResult<List<UserRoleDTO>> deactivateRole(@RequestParam("idRole") Integer idRole) {
+        List<UserRoleDTO> userRoleDTOList = roleService.getDeactivateUserRoleList(idRole);
+        return GlobalResultGenerator.genSuccessResult(userRoleDTOList);
+    }
+
+    @GetMapping("/user/get-activate-role")
+    public GlobalResult<List<UserRoleDTO>> activateRole(@RequestParam("idRole") Integer idRole) {
+        List<UserRoleDTO> userRoleDTOList = roleService.getActivateUserRoleList(idRole);
+        return GlobalResultGenerator.genSuccessResult(userRoleDTOList);
+    }
 
     @PostMapping("/role/post")  // 添加角色
     public GlobalResult<Boolean> addRole(@RequestBody Role role) throws ServiceException {
@@ -86,14 +94,26 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(groupedUsers);
     }
 
-    @PostMapping("/user/add-user") // 管理员直接创建用户（不授权）
+    @PostMapping("/user/add-user") // 管理员直接创建用户（团队管理员 未激活）
     public GlobalResult<Boolean> addUser(@RequestBody User user) throws Exception{
         boolean flag = userService.addUser(user);
         if(!flag){
-            return GlobalResultGenerator.genResult(false, null, "account is registered!!!");
+            return GlobalResultGenerator.genResult(false, null, "账户/邮箱已被注册");
         } else {
             return GlobalResultGenerator.genSuccessResult(true);
         }
+    }
+
+    @GetMapping("/user/activate-role") // 激活角色
+    public GlobalResult<Boolean> activateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
+        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 1);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    @GetMapping("/user/deactivate-role")  //取消激活
+    public GlobalResult<Boolean> deactivateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
+        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 0);
+        return GlobalResultGenerator.genSuccessResult(flag);
     }
 
     @GetMapping("/simple-roles")  // 获取全部role 的id 和 name
@@ -107,7 +127,7 @@ public class AdminController {
         // 只要有一个身份，就移除未认证
         for (Role role : roles) {
             if(role.getIdRole() == 5){
-                userService.revokeUserRole(idUser, role.getIdRole());
+                userService.revokeUserRole(idUser, 5);
             }
         }
         return GlobalResultGenerator.genSuccessResult(userService.grantUserRole(idUser, idRole));
@@ -124,9 +144,21 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(userService.revokeUserRole(idUser, idRole));
     }
 
-//    @PatchMapping("/user/update-role")  // 更新用户角色（授权）
-//    public GlobalResult<Boolean> updateUserRole(@RequestBody UserRoleDTO userRole) throws ServiceException {
-//        boolean flag = userService.updateUserRole(userRole.getIdUser(), userRole.getIdRole());
-//        return GlobalResultGenerator.genSuccessResult(flag);
-//    }
+    @GetMapping("user/delete-user")
+    public GlobalResult<Boolean> deleteUser(@RequestParam Long idUser) throws Exception{
+        boolean flag = userService.deleteUser(idUser);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    @GetMapping("user/show-user-info")
+    public GlobalResult<UserInfoDTO> showUserInfo(@RequestParam Long idUser) throws Exception{
+        UserInfoDTO userInfoDTo = userService.showUserInfo(idUser);
+        return GlobalResultGenerator.genSuccessResult(userInfoDTo);
+    }
+
+    @PostMapping("user/update-user-info")
+    public GlobalResult<Boolean> updateUserInfo(@RequestBody UserInfoDTO userInfoDTO) throws Exception{
+        boolean flag = userService.updateUserInfo(userInfoDTO);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
 }

@@ -10,10 +10,23 @@
         <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
     </resultMap>
+
     <resultMap id="BaseRoleMap" type="com.breech.extremity.dto.admin.RolesDTO">
         <id column="id" jdbcType="INTEGER" property="idRole"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
     </resultMap>
+
+    <resultMap id="UserRoleDTOMap" type="com.breech.extremity.dto.admin.UserRoleDTO">
+        <id column="id_user" jdbcType="INTEGER" property="idUser"/>
+        <id column="id_role" jdbcType="INTEGER" property="idRole"/>
+        <result column="created_time" jdbcType="DATE" property="createdTime"/>
+        <result column="name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="activated" jdbcType="INTEGER" property="activated"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="nickname" jdbcType="VARCHAR" property="nickName"/>
+        <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
+    </resultMap>
+
     <update id="updateStatus">
         update extremity_role set status = #{status},updated_time = sysdate() where id = #{idRole}
     </update>
@@ -32,4 +45,49 @@
         SELECT id, name
         FROM extremity_role
     </select>
+
+    <select id = "getRoleByAccount" resultType="Integer">
+        SELECT ur.id_role
+        FROM extremity_user u
+                 JOIN extremity_user_role ur ON u.id = ur.id_user
+        WHERE u.account = #{account} or u.email = #{account}
+    </select>
+
+    <update id = "activateRoleByUserId">
+        update extremity_user_role
+        SET activated = #{activated}
+        WHERE id_user = #{idUser} AND id_role = #{idRole};
+    </update>
+
+    <select id = "getUserRoleByUserId" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated
+        from extremity_user_role ur
+        join extremity_role r ON r.id = ur.id_role
+        where id_user = #{idUser}
+    </select>
+
+    <select id="getDeactivateUserRoleList" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+        join
+            extremity_role r
+            ON r.id = ur.id_role
+        join
+            extremity_user u
+            ON u.id = ur.id_user
+        where ur.activated = 0 AND r.id = #{idRole}
+    </select>
+
+    <select id="getActivateUserRoleList" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = 1 AND r.id = #{idRole}
+    </select>
+
 </mapper>
