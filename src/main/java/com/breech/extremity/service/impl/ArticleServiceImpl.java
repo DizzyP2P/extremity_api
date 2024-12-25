@@ -33,7 +33,7 @@ public class ArticleServiceImpl extends AbstractService<Article> implements Arti
     @Autowired
     private ObjectMapper jacksonObjectMapper;
 
-    @Value("${resource.url-prefix}")
+    @Value("${resource.image-url-prefix}")
     private String images_prefix;
     @Override
     public List<Article> getAllArticles(){

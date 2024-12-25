@@ -263,4 +263,58 @@ public class FileUtils {
         return hexString;
     }
 
+    /**
+     * 删除目录及其内容
+     *
+     * @param directoryPath 目录的绝对路径
+     * @return 如果删除成功返回 true，否则返回 false
+     */
+    public static boolean deleteDirectory(String directoryPath) {
+        File directory = new File(directoryPath);
+
+        if (!directory.exists()) {
+            logger.info("目录不存在: " + directoryPath);
+            return false;
+        }
+
+        if (!directory.isDirectory()) {
+            logger.info("指定的路径不是目录: " + directoryPath);
+            return false;
+        }
+
+        return deleteDirectoryRecursively(directory);
+    }
+
+    /**
+     * 递归删除目录
+     *
+     * @param directory 要删除的目录
+     * @return 如果删除成功返回 true，否则返回 false
+     */
+    private static boolean deleteDirectoryRecursively(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    // 递归删除子目录
+                    if (!deleteDirectoryRecursively(file)) {
+                        return false;
+                    }
+                } else {
+                    // 删除文件
+                    if (!file.delete()) {
+                        logger.error("文件删除失败: " + file.getAbsolutePath());
+                        return false;
+                    }
+                }
+            }
+        }
+        // 删除空目录
+        if (!directory.delete()) {
+            logger.error("目录删除失败: " + directory.getAbsolutePath());
+            return false;
+        }
+        return true;
+    }
+
 }

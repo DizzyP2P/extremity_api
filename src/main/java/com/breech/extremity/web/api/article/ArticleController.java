@@ -6,9 +6,11 @@ import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.model.Article;
 import com.breech.extremity.model.ArticleContent;
+import com.breech.extremity.model.Attachment;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.ArticleContentService;
 import com.breech.extremity.service.ArticleService;
+import com.breech.extremity.service.AttachmentService;
 import com.breech.extremity.util.FileUtils;
 import com.breech.extremity.util.UserUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -31,11 +33,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static cn.hutool.core.date.DateTime.now;
 
 @Slf4j
 @RestController
@@ -47,11 +51,100 @@ public class ArticleController {
     private ObjectMapper jacksonObjectMapper;
     @Resource
     private ArticleContentService articleContentService;
+    @Resource
+    private AttachmentService attachmentService;
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
 
     @Value("${resource.file-download-url}")
     private String fileDownloadUrl;
-    @Value("${resource.url-prefix}")
+
+    @Value("${resource.image-download-url}")
+    private String imageDownloadUrl;
+
+    @Value("${resource.image-url-prefix}")
     private String urlPrefix;
+
+    @GetMapping("/attachment/{id}")
+    @Transactional
+    public GlobalResult getAttachments(@PathVariable("id") String draftId) {
+        Condition cd = new Condition(Attachment.class);
+        cd.createCriteria().andEqualTo("articleId", Long.valueOf(draftId));
+        List<Attachment> res = attachmentService.findByCondition(cd);
+        return GlobalResultGenerator.genSuccessResult(res);
+    }
+
+    @DeleteMapping("/deleteattachmentById/{id}")
+    @Transactional
+    public GlobalResult deleteAttachment(@PathVariable("id") String id) {
+        User currentUser = UserUtils.getCurrentUserByToken();
+        Attachment res = attachmentService.findById(id);
+
+        if(res==null){
+            throw  new BusinessException("不存在");
+        }
+        Article article=  articleService.findById(String.valueOf(res.getArticleId()));
+        if(article==null){
+            throw  new BusinessException("未知错误");
+        }
+        if(!article.getArticleAuthorId().equals(currentUser.getIdUser())){
+            throw  new BusinessException("不是你的attachment");
+        }
+        attachmentService.deleteById(id);
+        FileUtils.delete(fileDownloadUrl+res.getAttachmentUrl());
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
+    @PostMapping("/attachment/{id}")
+    @Transactional
+    public GlobalResult uploadAttachment(@PathVariable("id") String draftId,
+                                         @RequestParam("file") MultipartFile file) {
+        // 校验文件是否为空
+        if (file.isEmpty()) {
+            return GlobalResultGenerator.genErrorResult("上传文件不能为空！");
+        }
+
+        // 校验文件大小（限制为 5MB）
+        long maxFileSize = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > maxFileSize) {
+            return GlobalResultGenerator.genErrorResult("文件大小不能超过 5MB！");
+        }
+        Attachment attachment = new Attachment();
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        String dirPath = fileDownloadUrl + File.separator + "article" +File.separator +draftId;
+        String filePath = dirPath + File.separator + fileName;
+
+        attachment.setAttachmentUrl(File.separator + "article" +File.separator +draftId+ File.separator+fileName);
+        attachment.setArticleId(Long.valueOf(draftId));
+        attachment.setAttachmentName(fileName);
+
+        try {
+            File dir = new File(dirPath);
+            if(!dir.exists()){
+                dir.mkdirs();
+            }
+            file.transferTo(new File(filePath));
+            attachmentService.save(attachment);
+            return GlobalResultGenerator.genSuccessResult(attachment);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return GlobalResultGenerator.genErrorResult("文件上传失败，原因：" + e.getMessage());
+        }
+    }
+
+    @PutMapping("/attachment/{id}")
+    @Transactional
+    public GlobalResult updateAttachment(@PathVariable("id") String attachmentId,@RequestBody Map<String,Object> attachmentName
+                                         ) {
+        Attachment attachment = attachmentService.findById(attachmentId);
+        if(attachment==null){
+            throw new BusinessException("没这个附件");
+        }
+        attachment.setAttachmentName(attachmentName.get("attachmentName").toString());
+        attachmentService.update(attachment);
+        return GlobalResultGenerator.genSuccessResult();
+    }
 
     @GetMapping
     public GlobalResult<List<Article>> getAllArticles() {
@@ -67,12 +160,17 @@ public class ArticleController {
         articletosave.setArticleStatus("0");
         articletosave.setArticleAuthorId(currentuser.getIdUser());
         articletosave.setArticleTitle(article.getArticleTitle());
+        articletosave.setCreatedTime(now());
+        articletosave.setUpdatedTime(now());
         articleService.save(articletosave);
         ArticleContent ct = new ArticleContent();
+        ct.setCreatedTime(now());
+        ct.setUpdatedTime(now());
         ct.setIdArticle(articletosave.getIdArticle());
         articleContentService.save(ct);
         return GlobalResultGenerator.genSuccessResult(articletosave.getIdArticle());
     }
+
 
     //get 一片文章的摘要信息
     @GetMapping("/DraftCompendium/{Id}")
@@ -89,6 +187,32 @@ public class ArticleController {
     }
 
     //get 一片文章的摘要信息
+    @GetMapping("/DraftWithAllInfo/{Id}")
+    public GlobalResult getDraftWithAllInfo(@PathVariable("Id") String draftId) {
+        User currentuser = UserUtils.getCurrentUserByToken();
+        Condition condition = new Condition(Article.class);
+        condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
+        List<Article> res = articleService.findByCondition(condition);
+
+        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
+            throw new BusinessException("你小子没有权限");
+        }
+        Article article = articleService.findById(draftId);
+        ArticleContent at = articleContentService.findById(draftId);
+        Map<String,Object> info = objectMapper.convertValue(article, Map.class);
+        try{
+            info.put("articleContent",jacksonObjectMapper.readTree(at.getArticleContent()));
+        }
+        catch (JsonProcessingException e){
+            throw new BusinessException(e.getMessage());
+        }
+        info.put("userId",currentuser.getIdUser());
+        info.put("userName",currentuser.getNickname());
+        info.put("avatarUrl",currentuser.getAvatarUrl());
+        return GlobalResultGenerator.genSuccessResult(info);
+    }
+
+    //post 一片文章的摘要信息
     @PostMapping(value = "/DraftCompendium", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public GlobalResult postCompendium(
             @RequestParam("idArticle") Long idArticle,
@@ -123,17 +247,18 @@ public class ArticleController {
             // 这里简单写法：例如把前端传来的 "tag1,tag2,tag3" 用逗号分隔
             article.setArticleTags(tags);
         }
+        article.setUpdatedTime(now());
 
         if (coverFile != null && !coverFile.isEmpty()) {
             String url = article.getArticleThumbnailUrl();
 
             if(url!=null){
-                FileUtils.delete(fileDownloadUrl+url);
+                FileUtils.delete(imageDownloadUrl+url);
             }
 
             String originalFilename = coverFile.getOriginalFilename();
             String newFileName = System.currentTimeMillis() + "_" + originalFilename;
-            File dest = new File(fileDownloadUrl+"/articles/" + String.valueOf(idArticle) +"/"+ newFileName);
+            File dest = new File(imageDownloadUrl+"/articles/" + String.valueOf(idArticle) +"/"+ newFileName);
             if(!dest.exists()){
                 dest.mkdirs();
             }
@@ -160,6 +285,7 @@ public class ArticleController {
             throw new BusinessException("你小子没有权限");
         }
         Article article = articleService.findById(draftId);
+        article.setUpdatedTime(now());
         article.setArticleStatus("1");
         articleService.update(article);
         return GlobalResultGenerator.genSuccessResult();
@@ -176,6 +302,7 @@ public class ArticleController {
                 throw new BusinessException("你小子没有权限");
         }
         article.setArticleStatus("0");
+        article.setUpdatedTime(now());
         articleService.update(article);
         return GlobalResultGenerator.genSuccessResult();
     }
@@ -192,10 +319,15 @@ public class ArticleController {
         if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
             throw new BusinessException("你小子没有权限");
         }
+        Article currentArticle = articleService.findById(draftId);
+        if(currentArticle.getArticleStatus().equals("1")){
+            throw new BusinessException("你小子没有权限");
+        }
         articleService.deleteById(draftId);
+        articleContentService.deleteById(draftId);
+        FileUtils.deleteDirectory(imageDownloadUrl+"/articles/" + draftId);
         return GlobalResultGenerator.genSuccessResult();
     }
-
 
     @GetMapping("/Draft/{draftId}")
     public GlobalResult getDrafts(@PathVariable("draftId") String draftId){
@@ -214,7 +346,6 @@ public class ArticleController {
 
     @GetMapping("/{userid}")
     public GlobalResult getAllArticlesByUserId(){
-
         User currentuser = UserUtils.getCurrentUserByToken();
         Condition condition = new Condition(Article.class);
         condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
@@ -234,11 +365,10 @@ public class ArticleController {
         Condition condition = new Condition(Article.class);
         condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
         List<Article> res = articleService.findByCondition(condition);
-
-        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(draftId)){
+        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
             throw new BusinessException("你小子没有权限");
         }
-
+        articleContentService.findById(draftId).setUpdatedTime(now());
         articleService.updateArticleContent(Long.valueOf(draftId),contentJson);
         try{
             JsonNode root = jacksonObjectMapper.readTree(contentJson);
@@ -254,7 +384,7 @@ public class ArticleController {
                 if (files == null) continue;
                 for (MultipartFile multipartFile : files) {
                     // Ensure the directory exists
-                    File directory = new File(fileDownloadUrl+"/articles/"+draftId);
+                    File directory = new File(imageDownloadUrl+"/articles/"+draftId);
                     if (!directory.exists()) {
                         directory.mkdirs();
                     }

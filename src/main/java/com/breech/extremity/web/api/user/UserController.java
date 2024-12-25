@@ -7,6 +7,7 @@ import com.breech.extremity.dto.UserDTO;
 import com.breech.extremity.dto.UserInfoDTO;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.UserService;
+import com.breech.extremity.util.UserUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ import java.io.IOException;
 @RequestMapping("/api/user")
 public class UserController {
 
-    @Value("${resource.file-download-url}")
+    @Value("${resource.image-download-url}")
     private String fileDownloadUrl;
     private static final Logger logger = LoggerFactory.getLogger(RedisServiceImpl.class);
 
@@ -48,6 +49,8 @@ public class UserController {
                                                @RequestParam("sex") String sex,
                                                @RequestParam("phone") String phone,
                                                @RequestParam("email") String email) {
+        User currentUser = UserUtils.getCurrentUserByToken();
+
         try {
             if (file == null || file.isEmpty()) {
 
@@ -74,12 +77,15 @@ public class UserController {
             if (fileName == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "文件名无效");
             }
+
             // 创建存储文件的目录（如果没有的话）
             File uploadDir = new File(fileDownloadUrl);
+
             if (!uploadDir.exists()) {
                 uploadDir.mkdirs();
             }
             User existingUser = userService.getUserByEmail(email);  // 获取用户信息
+
             String oldAvatarUrl = existingUser.getAvatarUrl();  // 获取旧头像文件名
 
             // 如果用户有旧头像文件，则删除它
