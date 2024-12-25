@@ -80,8 +80,8 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                     user.setNickname(checkNickname(nickname));
                     user.setAccount(checkAccount(nickname));
                     user.setEmail(email);
-                    user.setPassword(Utils.entryptPassword(password));
-                    user.setCreatedTime(new Date());
+                    user.setPassword(Utils.entryptPassword(password));   //
+                    user.setCreatedTime(new Date());                     //
                     user.setUpdatedTime(user.getCreatedTime());
                     user.setAvatarUrl(DEFAULT_AVATAR);
                     userMapper.insertSelective(user);
@@ -126,7 +126,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                 userMapper.updateLastOnlineTimeByAccount(user.getAccount());
                 TokenUser tokenUser = new TokenUser();
                 String token = tokenManager.createToken(user.getAccount());
-
                 if(token==null){
                     UserRolesDTO roles_res = this.findRolesByAccount(user.getAccount());
                     token = tokenManager.createToken(roles_res);
@@ -173,11 +172,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     }
 
     @Override
-    public UserDTO findUserDTOByAccount(String account) {
-        return userMapper.selectUserDTOByAccount(account);
-    }
-
-    @Override
     public boolean forgetPassword(String code, String password) throws ServiceException {
         String email = redisTemplate.boundValueOps(code).get();
         if (StringUtils.isBlank(email)) {
@@ -207,33 +201,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         if (user == null) {
             throw new ContentNotExistException("用户不存在!");
         }
-        return user;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public UserInfoDTO updateUserInfo(UserInfoDTO user) throws ServiceException {
-        String nickname = formatNickname(user.getNickname());
-        boolean flag = checkNicknameByIdUser(user.getIdUser(), nickname);
-        if (!flag) {
-            throw new NicknameOccupyException("该昵称已使用!");
-        }
-        user.setNickname(nickname);
-//        if (FileDataType.BASE64.equals(user.getAvatarType())) {
-//            String avatarUrl = UploadController.uploadBase64File(user.getAvatarUrl(), FilePath.AVATAR);
-//            user.setAvatarUrl(avatarUrl);
-//            user.setAvatarType("0");
-//        }
-//        Integer result = userMapper.updateUserInfo(user.getIdUser(), user.getNickname(), user.getAvatarType(), user.getAvatarUrl(), user.getSignature(), user.getSex());
-//        UserIndexUtil.addIndex(UserLucene.builder()
-//                .idUser(user.getIdUser())
-//                .nickname(user.getNickname())
-//                .signature(user.getSignature())
-//                .build());
-//        if (result == 0) {
-//            throw new ServiceException("操作失败!");
-//        }
-
         return user;
     }
 
@@ -315,19 +282,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         }
 
         log.warn("显然没有找到对应用户");
-        throw new UnauthorizedException();
-    }
-
-    @Override
-    public Set<String> findUserPermissions(User user) {
-        Set<String> permissions = new HashSet<>();
-        List<Role> roles = roleMapper.selectRoleByIdUser(user.getIdUser());
-        for (Role role : roles) {
-            if (StringUtils.isNotBlank(role.getInputCode())) {
-                permissions.add(role.getInputCode());
-            }
-        }
-        return permissions;
+        throw new UnauthenticatedException();
     }
 
     @Override
@@ -352,10 +307,24 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addUser(User user){
-        if(userMapper.selectUserDTOByAccount(user.getAccount()) != null){
+        // 账号和邮箱都不能重复
+        if(userMapper.selectUserByAccountAndEmail(user.getAccount(), user.getEmail()) != null){
             return false;
         }
-        return userMapper.addUser(user);
+        // 特殊处理
+        String nickname = user.getEmail().split("@")[0];
+        user.setNickname(nickname);
+        user.setPassword(Utils.entryptPassword(user.getPassword())); // 密码加密
+        user.setCreatedTime(new Date());
+        user.setUpdatedTime(user.getCreatedTime());
+        user.setStatus("0"); // 不在线
+
+        userMapper.addUser(user);
+        log.info(user.toString());
+
+        // 授予超级管理员身份
+        userMapper.grantUserRole(user.getIdUser(), 2);
+        return true;
     }
 
     @Override
@@ -366,6 +335,21 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     @Override
     public boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException{
         return userMapper.revokeUserRole(idUser, idRole);
+    }
+
+    @Override
+    public boolean deleteUser(Long idUser) throws ServiceException{
+        return userMapper.deleteUser(idUser);
+    }
+
+    @Override
+    public UserInfoDTO showUserInfo(Long idUser) throws ServiceException{
+        return userMapper.showUserInfo(idUser);
+    }
+
+    @Override
+    public boolean updateUserInfo(UserInfoDTO userInfoDTO) throws ServiceException{
+        return userMapper.updateUserInfo(userInfoDTO);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.breech.extremity.service.impl;
 import com.breech.extremity.core.exception.ServiceException;
 import com.breech.extremity.core.service.AbstractService;
 import com.breech.extremity.dto.admin.RolesDTO;
+import com.breech.extremity.dto.admin.UserRoleDTO;
 import com.breech.extremity.mapper.ArticleMapper;
 import com.breech.extremity.mapper.RoleMapper;
 import com.breech.extremity.model.Role;
@@ -28,6 +29,21 @@ public class RoleServiceImpl extends AbstractService<Role> implements RoleServic
     @Override
     public List<Role> findByIdUser(Long idUser) {
         return roleMapper.selectRoleByIdUser(idUser);
+    }
+
+    @Override
+    public UserRoleDTO getUserRoleByUserId(Long idUser){
+        return roleMapper.getUserRoleByUserId(idUser);
+    }
+
+    @Override
+    public List<UserRoleDTO> getDeactivateUserRoleList(Integer idRole){
+        return roleMapper.getDeactivateUserRoleList(idRole);
+    }
+
+    @Override
+    public List<UserRoleDTO> getActivateUserRoleList(Integer idRole){
+        return roleMapper.getActivateUserRoleList(idRole);
     }
 
     @Override
@@ -60,5 +76,15 @@ public class RoleServiceImpl extends AbstractService<Role> implements RoleServic
     @Override
     public List<RolesDTO> getAllRoles() throws ServiceException{
         return roleMapper.getAllRoles();
+    }
+
+    @Override
+    public Integer getRoleIdByAccount(String account) throws ServiceException{
+        return roleMapper.getRoleByAccount(account);
+    }
+
+    @Override
+    public boolean activateRoleByUserId(Long idUser, Integer idRole, Integer activated) throws ServiceException{
+        return roleMapper.activateRoleByUserId(idUser, idRole, activated);
     }
 }

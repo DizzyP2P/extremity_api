@@ -2,7 +2,7 @@ package com.breech.extremity.dto;
 
 
 import lombok.Data;
-
+// no use
 @Data
 public class UserDTO {
 
