@@ -168,17 +168,8 @@ public interface UserService extends Service<User> {
      */
     TokenUser refreshToken(String refreshToken);
 
-    /**
-     * 查询用户权限
-     *
-     * @param user
-     * @return
-     */
-    Set<String> findUserPermissions(User user);
 
     boolean hasAdminPermission(String account);
-
-
     /**
      * 根据role_id 返回用户分组
      *
@@ -189,10 +180,8 @@ public interface UserService extends Service<User> {
     Map<String,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
 
     boolean addUser(User user);
-
     boolean grantUserRole(Long idUser, Integer idRole) throws ServiceException;
     boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException;
-
     void updateUser(User user);
     User getUserByEmail(String email);
 }

@@ -36,7 +36,7 @@ class UserServiceImplTest {
        user.setCreatedTime(new Date());
        user.setUpdatedTime(user.getCreatedTime());
        user.setAvatarUrl("");
-       userMapper.insertSelective(user);
+       userMapper.addUser(user);
        user = userMapper.selectByAccount(email);
        Role role = roleMapper.selectRoleByInputCode("topop");
        userMapper.insertUserRole(user.getIdUser(), role.getIdRole());

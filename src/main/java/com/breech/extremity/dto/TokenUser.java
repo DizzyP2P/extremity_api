@@ -1,9 +1,6 @@
 package com.breech.extremity.dto;
-
-
 import lombok.Data;
-import java.util.Set;
-
+import java.util.List;
 @Data
 public class TokenUser {
     private Long idUser;
@@ -12,5 +9,5 @@ public class TokenUser {
     private String token;
     private String avatarUrl;
     private String refreshToken;
-    private Set<String> scope;
+    private List<Integer> scope;
 }

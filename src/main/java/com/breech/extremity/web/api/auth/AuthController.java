@@ -3,16 +3,14 @@ package com.breech.extremity.web.api.auth;
 import com.alibaba.fastjson2.JSONObject;
 import com.breech.extremity.auth.TokenManager;
 import com.breech.extremity.auth.annotation.RolesAllowed;
-import com.breech.extremity.core.exception.AccountExistsException;
-import com.breech.extremity.core.exception.BusinessException;
-import com.breech.extremity.core.exception.ServiceException;
-import com.breech.extremity.core.exception.UnknownAccountException;
+import com.breech.extremity.core.exception.*;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.core.response.NormalResponseMessage;
 import com.breech.extremity.dto.ForgetPasswordDTO;
 import com.breech.extremity.dto.TokenUser;
 import com.breech.extremity.dto.UserRegisterInfoDTO;
+import com.breech.extremity.model.Role;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.JavaMailService;
 import com.breech.extremity.service.UserService;
@@ -23,8 +21,10 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -110,13 +110,18 @@ public class AuthController {
 
     @GetMapping("/user")
     public GlobalResult<JSONObject> user() {
-        User user = UserUtils.getCurrentUserByToken();
-        TokenUser tokenUser = new TokenUser();
-        BeanCopierUtil.copy(user, tokenUser);
-        tokenUser.setScope(userService.findUserPermissions(user));
-        JSONObject object = new JSONObject();
-        object.put("user", tokenUser);
-        return GlobalResultGenerator.genSuccessResult(object);
+        try{
+            User user = UserUtils.getCurrentUserByToken();
+            TokenUser tokenUser = new TokenUser();
+            BeanCopierUtil.copy(user, tokenUser);
+            List<Role> res = userService.findRolesByUserId(user.getIdUser());
+            tokenUser.setScope(res.stream().map(Role::getIdRole).collect(Collectors.toList()));
+            JSONObject object = new JSONObject();
+            object.put("user", tokenUser);
+            return GlobalResultGenerator.genSuccessResult(object);
+        }catch (UnauthorizedException e){
+            return GlobalResultGenerator.genErrorResult("当前用户未登陆");
+        }
     }
 
 }
