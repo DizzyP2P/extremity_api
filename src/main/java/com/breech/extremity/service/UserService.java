@@ -56,13 +56,6 @@ public interface UserService extends Service<User> {
 
     TokenUser adminLogin(String account, String password);
 
-    /**
-     * 通过 account 获取用户信息接口
-     *
-     * @param account 昵称
-     * @return UserDTO
-     */
-    UserDTO findUserDTOByAccount(String account);
 
     /**
      * 找回密码接口
@@ -95,11 +88,11 @@ public interface UserService extends Service<User> {
     /**
      * 更新用户信息
      *
-     * @param user
+     * @param userInfoDTO
      * @return
      * @throws ServiceException
      */
-    UserInfoDTO updateUserInfo(UserInfoDTO user) throws ServiceException;
+    boolean updateUserInfo(UserInfoDTO userInfoDTO) throws ServiceException;
 
     /**
      * 验证昵称是否重复
@@ -126,22 +119,6 @@ public interface UserService extends Service<User> {
      */
     Author selectAuthor(Long idUser);
 
-//    /**
-//     * 更换邮箱
-//     *
-//     * @param changeEmailDTO
-//     * @return
-//     * @throws ServiceException
-//     */
-//    boolean updateEmail(ChangeEmailDTO changeEmailDTO) throws ServiceException;
-
-//    /**
-//     * 更新密码
-//     *
-//     * @param updatePasswordDTO
-//     * @return
-//     */
-//    boolean updatePassword(UpdatePasswordDTO updatePasswordDTO);
 
     /**
      * 查询用户列表
@@ -182,6 +159,11 @@ public interface UserService extends Service<User> {
     boolean addUser(User user);
     boolean grantUserRole(Long idUser, Integer idRole) throws ServiceException;
     boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException;
+
+    boolean deleteUser(Long idUser) throws ServiceException;
+
+    UserInfoDTO showUserInfo(Long idUser) throws ServiceException;
+
     void updateUser(User user);
     User getUserByEmail(String email);
 }

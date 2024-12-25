@@ -13,6 +13,7 @@ import com.breech.extremity.dto.UserRegisterInfoDTO;
 import com.breech.extremity.model.Role;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.JavaMailService;
+import com.breech.extremity.service.RoleService;
 import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.BeanCopierUtil;
 import com.breech.extremity.util.UserUtils;
@@ -32,6 +33,8 @@ public class AuthController {
 
     @Resource
     private JavaMailService javaMailService;
+    @Resource
+    private RoleService roleService;
     @Resource
     private UserService userService;
     @Resource
@@ -59,7 +62,6 @@ public class AuthController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
-
     @PostMapping("/adminlogin")
     public GlobalResult<TokenUser> adminLogin(@RequestBody User user) {
         TokenUser tokenUser = userService.login(user.getAccount(), user.getPassword());
@@ -69,7 +71,10 @@ public class AuthController {
     @PostMapping("/login")
     public GlobalResult<TokenUser> login(@RequestBody User user) {
         TokenUser tokenUser = userService.login(user.getAccount(), user.getPassword());
-        return GlobalResultGenerator.genSuccessResult(tokenUser);
+        Integer roleId = roleService.getRoleIdByAccount(user.getAccount());
+        // return GlobalResultGenerator.genSuccessResult(tokenUser);
+        // message充当第二data
+        return GlobalResultGenerator.genResult(true, tokenUser, roleId.toString());
     }
 
     @PostMapping("/refresh-token")

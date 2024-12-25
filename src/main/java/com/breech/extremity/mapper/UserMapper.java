@@ -32,12 +32,13 @@ public interface UserMapper extends Mapper<User> {
     UserInfoDTO findUserInfoByAccount(@Param("account") String account);
 
     /**
-     * 根据用户昵称获取用户信息
+     * 超级管理员创建团队管理员时的检查
      *
      * @param account
-     * @return
+     * @Param email
+     * @return null/not null
      */
-    UserDTO selectUserDTOByAccount(@Param("account") String account);
+    User selectUserByAccountAndEmail(@Param("account") String account, @Param("email") String email);
 
     /**
      * 修改用户密码
@@ -84,15 +85,10 @@ public interface UserMapper extends Mapper<User> {
     /**
      * 更新用户信息
      *
-     * @param idUser
-     * @param nickname
-     * @param avatarType
-     * @param avatarUrl
-     * @param signature
-     * @param sex
+     * @param "UserInfoDTO"
      * @return
      */
-    Integer updateUserInfo(@Param("idUser") Long idUser, @Param("nickname") String nickname, @Param("avatarType") String avatarType, @Param("avatarUrl") String avatarUrl, @Param("signature") String signature, @Param("sex") String sex);
+    Boolean updateUserInfo(@Param("userInfoDTO") UserInfoDTO userInfoDTO);
 
     /**
      * 验证昵称是否重复
@@ -161,12 +157,6 @@ public interface UserMapper extends Mapper<User> {
      */
     boolean hasAdminPermission(@Param("email") String email);
 
-    /**
-     * 验证账号是否重复
-     *
-     * @param account
-     * @return
-     */
     Integer selectCountByAccount(@Param("account") String account);
 
     List<UserDTO> getUsersByRoleId(@Param("roleId") Integer roleId);
@@ -178,7 +168,7 @@ public interface UserMapper extends Mapper<User> {
      *
      * @param idUser
      * @param idRole
-     * @return
+     *
      */
     Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
 
@@ -200,6 +190,12 @@ public interface UserMapper extends Mapper<User> {
      */
     boolean revokeUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
 
+    /**
+     * 注销用户账号
+     */
+    boolean deleteUser(@Param("idUser") Long idUser);
+
+    UserInfoDTO showUserInfo(@Param("idUser") Long idUser);
 
     void updateByEmail(User user);
 
