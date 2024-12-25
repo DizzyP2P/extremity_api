@@ -35,7 +35,7 @@ public interface UserService extends Service<User> {
      * @param code     验证码
      * @return Map
      */
-    boolean register(String email, String password, String code);
+    boolean register(String email, String password, String code,String message) ;
 
     /**
      * 登录接口

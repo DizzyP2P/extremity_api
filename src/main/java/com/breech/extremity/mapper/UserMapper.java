@@ -170,7 +170,7 @@ public interface UserMapper extends Mapper<User> {
      * @param idRole
      *
      */
-    Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole);
+    Integer insertUserRole(@Param("idUser") Long idUser, @Param("idRole") Integer idRole,@Param("message")String message,@Param("activated") int activated);
 
     /**
      * 为用户授予角色

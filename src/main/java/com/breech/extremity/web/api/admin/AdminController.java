@@ -94,7 +94,7 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(groupedUsers);
     }
 
-    @PostMapping("/user/add-user") // 管理员直接创建用户（团队管理员 未激活）
+    @PostMapping("/user/add-user") // 管理员直接创建用户（团队管理员 直接激活，但是没有额外权限）
     public GlobalResult<Boolean> addUser(@RequestBody User user) throws Exception{
         boolean flag = userService.addUser(user);
         if(!flag){
@@ -116,33 +116,40 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
+//    @GetMapping("/user/manage-permission")  // 管理团队管理员更高级的权限
+//    public GlobalResult<Boolean> managePermission(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole, @RequestParam("level")Integer level) throws Exception {
+//        boolean flag = roleService.activateRoleByUserId(idUser, idRole, level);
+//        return GlobalResultGenerator.genSuccessResult(flag);
+//    }
+
+
     @GetMapping("/simple-roles")  // 获取全部role 的id 和 name
     public GlobalResult<List<RolesDTO>> getAllRoles() throws Exception {
         return GlobalResultGenerator.genSuccessResult(roleService.getAllRoles());
     }
 
-    @GetMapping("user/grant-role")
-    public GlobalResult<Boolean> grantUserRole(@RequestParam Long idUser, @RequestParam Integer idRole) throws Exception{
-        List<Role> roles = roleService.findByIdUser(idUser);
-        // 只要有一个身份，就移除未认证
-        for (Role role : roles) {
-            if(role.getIdRole() == 5){
-                userService.revokeUserRole(idUser, 5);
-            }
-        }
-        return GlobalResultGenerator.genSuccessResult(userService.grantUserRole(idUser, idRole));
-    }
-
-    @GetMapping("user/revoke-role")
-    public GlobalResult<Boolean> revokeUserRole(@RequestParam Long idUser, @RequestParam Integer idRole) throws Exception{
-        List<Role> roles = roleService.findByIdUser(idUser);
-        // 至少保留一个身份
-        if(roles.size() == 1){
-            userService.revokeUserRole(idUser, idRole);
-            return GlobalResultGenerator.genResult(userService.grantUserRole(idUser, 5), null, "roll back to unauthorized_user");
-        }
-        return GlobalResultGenerator.genSuccessResult(userService.revokeUserRole(idUser, idRole));
-    }
+//    @GetMapping("user/grant-role")
+//    public GlobalResult<Boolean> grantUserRole(@RequestParam Long idUser, @RequestParam Integer idRole) throws Exception{
+//        List<Role> roles = roleService.findByIdUser(idUser);
+//        // 只要有一个身份，就移除未认证
+//        for (Role role : roles) {
+//            if(role.getIdRole() == 5){
+//                userService.revokeUserRole(idUser, 5);
+//            }
+//        }
+//        return GlobalResultGenerator.genSuccessResult(userService.grantUserRole(idUser, idRole));
+//    }
+//
+//    @GetMapping("user/revoke-role")
+//    public GlobalResult<Boolean> revokeUserRole(@RequestParam Long idUser, @RequestParam Integer idRole) throws Exception{
+//        List<Role> roles = roleService.findByIdUser(idUser);
+//        // 至少保留一个身份
+//        if(roles.size() == 1){
+//            userService.revokeUserRole(idUser, idRole);
+//            return GlobalResultGenerator.genResult(userService.grantUserRole(idUser, 5), null, "roll back to unauthorized_user");
+//        }
+//        return GlobalResultGenerator.genSuccessResult(userService.revokeUserRole(idUser, idRole));
+//    }
 
     @GetMapping("user/delete-user")
     public GlobalResult<Boolean> deleteUser(@RequestParam Long idUser) throws Exception{

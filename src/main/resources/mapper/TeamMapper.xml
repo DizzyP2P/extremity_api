@@ -4,9 +4,62 @@
     <resultMap id="BaseTeamInfoMap" type="com.breech.extremity.model.TeamInfo">
         <id column="team_id" jdbcType="INTEGER" property="teamId"/>
         <id column="team_name" jdbcType="VARCHAR" property="teamName"/>
-        <id column="description" jdbcType="VARCHAR" property="teamName"/>
+        <id column="research_field" jdbcType="VARCHAR" property="researchField"/>
+        <id column="description" jdbcType="VARCHAR" property="description"/>
         <id column="created_at" jdbcType="DATE" property="createdAt"/>
     </resultMap>
+
+    <resultMap id="BaseUserMap" type="com.breech.extremity.model.User">
+        <id column="id" property="idUser"/>
+        <result column="account" property="account"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="real_name" property="realName"/>
+        <result column="sex" property="sex"/>
+        <result column="avatar_type" property="avatarType"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="status" property="status"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="last_online_time" property="lastOnlineTime"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="bg_img_url" property="bgImgUrl"/>
+    </resultMap>
+
+    <resultMap id="TeamMemberInfoDTOMap" type="com.breech.extremity.dto.TeamMemberInfoDTO">
+        <id column="id" property="teamMemberId"/>
+        <result column="account" property="account"/>
+        <result column="nickname" property="nickname"/>
+        <result column="real_name" property="realName"/>
+        <result column="sex" property="sex"/>
+        <result column="avatar_url" property="avatarUrl"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="status" property="status"/>
+        <result column="signature" property="signature"/>
+        <result column="bg_img_url" property="bgImgUrl"/>
+        <result column="position" property="position"/>
+        <result column="research_direction" property="researchDirection"/>
+        <result column="personal_bio" property="personalBio"/>
+        <result column="research_overview" property="researchOverview"/>
+    </resultMap>
+
+    <resultMap id="UserRoleDTOMap" type="com.breech.extremity.dto.admin.UserRoleDTO">
+        <id column="id_user" jdbcType="INTEGER" property="idUser"/>
+        <id column="id_role" jdbcType="INTEGER" property="idRole"/>
+        <result column="created_time" jdbcType="DATE" property="createdTime"/>
+        <result column="name" jdbcType="VARCHAR" property="roleName"/>
+        <result column="activated" jdbcType="INTEGER" property="activated"/>
+        <result column="message" jdbcType="VARCHAR" property="message"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="nickname" jdbcType="VARCHAR" property="nickName"/>
+        <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
+    </resultMap>
+
+
+
 
     <select id="selectTeamInfo" resultMap="BaseTeamInfoMap">
         select e.*
@@ -17,10 +70,117 @@
     <update id="updateTeamInfo">
         update extremity_team
         set
-            team_name = #{teamName},
-            research_field = #{researchField},
-            description = #{description},
-            created_at = #{createdAt}
+            team_name = #{teamInfo.teamName},
+            research_field = #{teamInfo.researchField},
+            description = #{teamInfo.description}
         where team_id = #{teamInfo.teamId};
     </update>
+
+    <select id="selectActivatedNormalUsers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = 1 AND r.id = 4
+    </select>
+
+    <select id="selectActivatedTeamMembers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = 1 AND r.id = 3
+    </select>
+
+    <select id="selectDeactivatedNormalUsers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = 0 AND r.id = 4
+    </select>
+
+    <select id="selectDeactivatedTeamMembers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = 0 AND r.id = 3
+    </select>
+
+    <select id="selectRefusedNormalUsers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = -1 AND r.id = 3
+    </select>
+
+    <select id="selectRefusedTeamMembers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+        where ur.activated = -1 AND r.id = 3
+    </select>
+
+<!--    <select id="selectActivatedNormalUsers" resultMap="BaseUserMap">-->
+<!--        select u.*-->
+<!--        from extremity_user u-->
+<!--        join extremity_user_role ur ON ur.id_user = u.id-->
+<!--        where ur.id_role=4 and ur.activated=1-->
+<!--    </select>-->
+
+<!--    <select id="selectActivatedTeamMembers" resultMap="BaseUserMap">-->
+<!--        select u.*-->
+<!--        from extremity_user u-->
+<!--        join extremity_user_role ur ON u.id = ur.id_user-->
+<!--        where ur.id_role=3 and ur.activated=1-->
+<!--    </select>-->
+
+<!--    <select id="selectDeactivatedNormalUsers" resultMap="BaseUserMap">-->
+<!--        select u.*-->
+<!--        from extremity_user u-->
+<!--                 join extremity_user_role ur ON ur.id_user = u.id-->
+<!--        where ur.id_role=4 and ur.activated=0-->
+<!--    </select>-->
+
+<!--    <select id="selectDeactivatedTeamMembers" resultMap="BaseUserMap">-->
+<!--        select u.*-->
+<!--        from extremity_user u-->
+<!--                 join extremity_user_role ur ON u.id = ur.id_user-->
+<!--        where ur.id_role=3 and ur.activated=0-->
+<!--    </select>-->
+
+    <select id="selectTeamMemberInfoById" resultMap="TeamMemberInfoDTOMap">
+        select u.id, u.account, u.nickname, u.real_name, u.sex, u.avatar_url, u.email, u.phone, u.status, u.signature, u.bg_img_url, tu.position, tu.research_direction, tu.personal_bio, tu.research_overview
+        from extremity_user u
+        join extremity_team_user_info tu ON u.id = tu.id
+        join extremity_user_role ur ON ur.id_user = u.id
+        where u.id = #{teamMemberId} and ur.activated = 1
+    </select>
 </mapper>

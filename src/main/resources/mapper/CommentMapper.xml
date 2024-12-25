@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.breech.extremity.mapper.CommentMapper">
+    <resultMap id="CommentResultMap" type="com.breech.extremity.model.Comment">
+        <!-- 映射主键 -->
+        <id column="id" property="id" />
+
+        <!-- 映射普通字段 -->
+        <result column="user_id" property="userId" />
+        <result column="comment" property="comment" />
+        <result column="parent_id" property="parentId" />
+        <result column="root_comment_id" property="rootCommentId" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+        <result column="is_deleted" property="isDeleted" />
+    </resultMap>
+
+    <!--    <select id=""-->
+    <select id="selectAllTopComments" resultMap="CommentResultMap">
+        select id, user_id, comment,created_at,updated_at
+        from extremity_comments
+        where root_comment_id =0
+            and is_deleted = 0
+        order by created_at desc;
+    </select>
+    <select id="selectAllComments" parameterType="long" resultMap="CommentResultMap">
+        select id, user_id, comment,created_at,updated_at,parent_id,root_comment_id
+        from extremity_comments
+        where root_comment_id = #{id}
+            and is_deleted = 0
+        order by created_at desc;
+    </select>
+    <select id="selectById" parameterType="long" resultMap="CommentResultMap">
+        select id, user_id, comment,created_at,updated_at,parent_id,root_comment_id
+        from extremity_comments
+        where id = #{id}
+    </select>
+    <insert id="insertComment" parameterType="com.breech.extremity.model.Comment">
+        insert INTO extremity_comments(user_id,comment,parent_id,root_comment_id,created_at,updated_at)
+        values (#{userId},#{comment},#{parentId},#{rootCommentId},#{createdAt},#{updatedAt})
+    </insert>
+</mapper>

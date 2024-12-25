@@ -137,12 +137,12 @@
     </insert>
     <!-- 没测，mo useage -->
     <insert id="insertUserRole">
-        insert into extremity_user_role (id_user,id_role,created_time) values (#{idUser},#{idRole},sysdate())
+        insert into extremity_user_role (id_user,id_role,created_time,activated,message) values (#{idUser},#{idRole},sysdate(),#{activated},#{message})
     </insert>
-    <!-- 为用户授予角色（团队管理员）（未激活） -->
+    <!-- 为用户授予角色（团队管理员）（直接激活） -->
     <insert id="grantUserRole">
-        INSERT INTO extremity_user_role (id_user, id_role, created_time, activated)
-        VALUES (#{idUser}, #{idRole}, NOW(), 0)
+        INSERT INTO extremity_user_role (id_user, id_role, created_time, activated, message)
+        VALUES (#{idUser}, #{idRole}, NOW(), 1, '管理员创建')
     </insert>
     <!-- 撤销用户角色 no usage -->
     <delete id="revokeUserRole">
