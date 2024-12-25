@@ -46,27 +46,39 @@ public class TeamAdminController {
 //        return GlobalResultGenerator.genSuccessResult(flag);
 //    }
 
-    @GetMapping("/get-activated-normal-users")  // 获取普通用户
+    @GetMapping("/get-activated-normal-users")  // 获取普通用户（已通过）
     public GlobalResult<List<User>> getActivatedNormalUsers() throws Exception {
         List<User> userList = teamService.getActivatedNormalUsers();
         return GlobalResultGenerator.genSuccessResult(userList);
     }
 
-    @GetMapping("/get-activated-team-members") // 获取团队用户
+    @GetMapping("/get-activated-team-members") // 获取团队用户（已通过）
     public GlobalResult<List<User>> getActivatedTeamMembers() throws Exception {
         List<User> userList = teamService.getActivatedTeamMembers();
         return GlobalResultGenerator.genSuccessResult(userList);
     }
 
-    @GetMapping("/get-deactivated-normal-users")  // 获取普通用户（未认证）
+    @GetMapping("/get-deactivated-normal-users")  // 获取普通用户（待审核）
     public GlobalResult<List<User>> getDeactivatedNormalUsers() throws Exception {
         List<User> userList = teamService.getDeactivatedNormalUsers();
         return GlobalResultGenerator.genSuccessResult(userList);
     }
 
-    @GetMapping("/get-deactivated-team-members")  // 获取团队成员（未认证）
+    @GetMapping("/get-deactivated-team-members")  // 获取团队成员（待审核）
     public GlobalResult<List<User>> getDeactivatedTeamMembers() throws Exception {
         List<User> userList = teamService.getDeactivatedTeamMembers();
+        return GlobalResultGenerator.genSuccessResult(userList);
+    }
+
+    @GetMapping("/get-refused-normal-users")  // 获取普通用户（拒绝）
+    public GlobalResult<List<User>> getRefusedNormalUsers() throws Exception {
+        List<User> userList = teamService.getRefusedNormalUsers();
+        return GlobalResultGenerator.genSuccessResult(userList);
+    }
+
+    @GetMapping("/get-refused-team-members")  // 获取团队成员（拒绝）
+    public GlobalResult<List<User>> getRefusedTeamMembers() throws Exception {
+        List<User> userList = teamService.getRefusedTeamMembers();
         return GlobalResultGenerator.genSuccessResult(userList);
     }
 
@@ -76,7 +88,7 @@ public class TeamAdminController {
         return  GlobalResultGenerator.genSuccessResult(teamMemberInfoDTO);
     }
 
-    @PostMapping("add-team-member") // 创建团队成员账号并编辑信息 直接激活
+    @PostMapping("add-team-member") // 创建团队成员账号并编辑信息 直接通过
     public GlobalResult<Boolean> addTeamMember(@RequestBody User user) throws Exception {
         boolean flag = teamService.addTeamMemberAccount(user);
         if(!flag){
@@ -85,4 +97,18 @@ public class TeamAdminController {
             return GlobalResultGenerator.genSuccessResult(true);
         }
     }
+
+    @GetMapping("activate-role") // 激活/同意申请
+    public GlobalResult<Boolean> activateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
+        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 1);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    @GetMapping("deactivate-role")  //取消激活    这个没用了
+    public GlobalResult<Boolean> deactivateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
+        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 0);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    // 拒绝 + 拒绝理由
 }

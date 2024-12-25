@@ -15,6 +15,7 @@ public class UserRoleDTO {
     private Integer idRole;
     private LocalDateTime createdTime;
     private Integer activated;
+    private String message;
 
     private String email;
     private String nickName;
