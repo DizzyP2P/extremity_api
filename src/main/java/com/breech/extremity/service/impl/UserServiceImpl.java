@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -86,8 +87,17 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                     user.setAvatarUrl(DEFAULT_AVATAR);
                     userMapper.insertSelective(user);
                     user = userMapper.selectByAccount(email);
-                    Role role = roleMapper.selectRoleByInputCode("unauthorized_user");
-                    userMapper.insertUserRole(user.getIdUser(), role.getIdRole(),message,0);
+                    log.warn(user.toString());
+                    Condition condition = new Condition(Role.class);
+                    condition.createCriteria().andEqualTo("name",message);
+                    List<Role> role = roleMapper.selectByCondition(condition);
+                    try{
+                        Role role1 = role.get(0);
+                        userMapper.insertUserRole(user.getIdUser(), role1.getIdRole(),message,0);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                    // userMapper.insertUserRole(user.getIdUser(), role.getIdRole(),message,0);
                     redisTemplate.delete(email);
                     return true;
                 }
