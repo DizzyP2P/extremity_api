@@ -36,7 +36,11 @@ public class UserController {
         return GlobalResultGenerator.genSuccessResult(user);
     }
 
-
+    @GetMapping("/id")
+    public GlobalResult<UserInfoDTO> findUserDTOById(@RequestParam("id") long id){
+        UserInfoDTO user = userService.findUserInfo(id);
+        return GlobalResultGenerator.genSuccessResult(user);
+    }
     @PostMapping("/upload-avatar")
     public GlobalResult<String> uploadAvatar(@RequestParam(value = "file", required = false) MultipartFile file,
                                                @RequestParam("account") String account,
