@@ -2,9 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.breech.extremity.mapper.UserMapper">
     <resultMap id="BaseResultMap" type="com.breech.extremity.model.User">
-        <!--
-          WARNING - @mbg.generated
-        -->
         <id column="id" property="idUser"/>
         <result column="account" property="account"/>
         <result column="password" property="password"/>
@@ -39,6 +36,7 @@
         <result column="signature" property="signature"/>
         <result column="bg_img_url" property="bgImgUrl"/>
     </resultMap>
+
     <resultMap id="DTOResultMapper" type="com.breech.extremity.dto.UserDTO">
         <result column="id" property="idUser"/>
         <result column="account" property="account"/>
@@ -48,6 +46,7 @@
         <result column="signature" property="signature"/>
         <result column="bg_img_url" property="bgImgUrl"/>
     </resultMap>
+
     <resultMap id="AuthorResultMap" type="com.breech.extremity.dto.Author">
         <result column="id" property="idUser"/>
         <result column="nickname" property="userNickname"/>
@@ -208,7 +207,7 @@
         where email = #{email}
     </update>
     <select id="selectByEmail" parameterType="string" resultMap="BaseResultMap">
-        select * FROM extremity_user where email=#{email}
+        select * FROM extremity_user where email=#{email} OR account= #{email}
     </select>
 
 </mapper>

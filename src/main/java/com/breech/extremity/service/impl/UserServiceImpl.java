@@ -282,19 +282,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         }
 
         log.warn("显然没有找到对应用户");
-        throw new UnauthorizedException();
-    }
-
-    @Override
-    public Set<String> findUserPermissions(User user) {
-        Set<String> permissions = new HashSet<>();
-        List<Role> roles = roleMapper.selectRoleByIdUser(user.getIdUser());
-        for (Role role : roles) {
-            if (StringUtils.isNotBlank(role.getInputCode())) {
-                permissions.add(role.getInputCode());
-            }
-        }
-        return permissions;
+        throw new UnauthenticatedException();
     }
 
     @Override

@@ -22,7 +22,6 @@ public class GlobalResultGenerator {
     }
 
     public static <T> GlobalResult<T> genErrorResult(String message) {
-
         return genResult(false, null, message);
     }
 
