@@ -334,7 +334,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
         userMapper.addUser(user);
         log.info(user.toString());
 
-        // 授予超级管理员身份
+        // 授予团队管理员身份
         userMapper.grantUserRole(user.getIdUser(), 2);
         return true;
     }

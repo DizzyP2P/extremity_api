@@ -1,8 +1,12 @@
 package com.breech.extremity.mapper;
 
 import com.breech.extremity.core.mapper.Mapper;
+import com.breech.extremity.dto.TeamMemberInfoDTO;
 import com.breech.extremity.model.TeamInfo;
+import com.breech.extremity.model.User;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface TeamMapper extends Mapper<TeamInfo> {
     /**
@@ -17,4 +21,14 @@ public interface TeamMapper extends Mapper<TeamInfo> {
      * @return boolean
      */
     boolean updateTeamInfo(@Param("teamInfo")TeamInfo teamInfo);
+
+    List<User> selectActivatedNormalUsers();
+
+    List<User> selectActivatedTeamMembers();
+
+    List<User> selectDeactivatedNormalUsers();
+
+    List<User> selectDeactivatedTeamMembers();
+
+    TeamMemberInfoDTO selectTeamMemberInfoById(@Param("teamMemberId") Integer teamMemberId);
 }

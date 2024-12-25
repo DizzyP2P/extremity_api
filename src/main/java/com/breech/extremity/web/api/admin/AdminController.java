@@ -94,7 +94,7 @@ public class AdminController {
         return GlobalResultGenerator.genSuccessResult(groupedUsers);
     }
 
-    @PostMapping("/user/add-user") // 管理员直接创建用户（团队管理员 未激活）
+    @PostMapping("/user/add-user") // 管理员直接创建用户（团队管理员 直接激活，但是没有额外权限）
     public GlobalResult<Boolean> addUser(@RequestBody User user) throws Exception{
         boolean flag = userService.addUser(user);
         if(!flag){
@@ -115,6 +115,13 @@ public class AdminController {
         boolean flag = roleService.activateRoleByUserId(idUser, idRole, 0);
         return GlobalResultGenerator.genSuccessResult(flag);
     }
+
+//    @GetMapping("/user/manage-permission")  // 管理团队管理员更高级的权限
+//    public GlobalResult<Boolean> managePermission(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole, @RequestParam("level")Integer level) throws Exception {
+//        boolean flag = roleService.activateRoleByUserId(idUser, idRole, level);
+//        return GlobalResultGenerator.genSuccessResult(flag);
+//    }
+
 
     @GetMapping("/simple-roles")  // 获取全部role 的id 和 name
     public GlobalResult<List<RolesDTO>> getAllRoles() throws Exception {
