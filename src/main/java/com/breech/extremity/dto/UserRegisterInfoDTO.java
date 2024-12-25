@@ -7,4 +7,5 @@ public class UserRegisterInfoDTO {
     private String email;
     private String password;
     private String code;
+    private String message;
 }

@@ -67,7 +67,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean register(String email, String password, String code) {
+    public boolean register(String email, String password, String code,String message) {
         String vCode = redisTemplate.boundValueOps(email).get();
         if (StringUtils.isNotBlank(vCode)) {
             if (vCode.equals(code)) {
@@ -87,7 +87,7 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                     userMapper.insertSelective(user);
                     user = userMapper.selectByAccount(email);
                     Role role = roleMapper.selectRoleByInputCode("unauthorized_user");
-                    userMapper.insertUserRole(user.getIdUser(), role.getIdRole());
+                    userMapper.insertUserRole(user.getIdUser(), role.getIdRole(),message,0);
                     redisTemplate.delete(email);
                     return true;
                 }
