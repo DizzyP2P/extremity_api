@@ -58,7 +58,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public GlobalResult<Boolean> register(@RequestBody UserRegisterInfoDTO registerInfo) {
-        boolean flag = userService.register(registerInfo.getEmail(), registerInfo.getPassword(), registerInfo.getCode());
+        boolean flag = userService.register(registerInfo.getEmail(), registerInfo.getPassword(), registerInfo.getCode(),registerInfo.getMessage());
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
