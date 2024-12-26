@@ -274,7 +274,7 @@ public class ArticleController {
     }
 
 
-    @PostMapping("/{draftId}")
+    @GetMapping("/doAudit/{draftId}")
     @Transactional
     public GlobalResult deliverArticle(@PathVariable("draftId") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
@@ -285,11 +285,39 @@ public class ArticleController {
             throw new BusinessException("你小子没有权限");
         }
         Article article = articleService.findById(draftId);
+        if(!article.getArticleStatus().equals("0")){
+            throw new BusinessException("文章已经在审核了");
+        }
         article.setUpdatedTime(now());
-        article.setArticleStatus("1");
+        article.setArticleStatus("2");
         articleService.update(article);
         return GlobalResultGenerator.genSuccessResult();
     }
+
+    @GetMapping("/undoAudit/{draftId}")
+    @Transactional
+    public GlobalResult undeliverArticle(@PathVariable("draftId") String draftId) {
+        User currentuser = UserUtils.getCurrentUserByToken();
+        Condition condition = new Condition(Article.class);
+        condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
+        List<Article> res = articleService.findByCondition(condition);
+
+        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
+            throw new BusinessException("你小子没有权限");
+        }
+
+        Article article = articleService.findById(draftId);
+
+        if(!article.getArticleStatus().equals("2")){
+            throw new BusinessException("文章状态不对");
+        }
+
+        article.setUpdatedTime(now());
+        article.setArticleStatus("0");
+        articleService.update(article);
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
 
     @PutMapping("/Draft")
     @Transactional
@@ -298,9 +326,11 @@ public class ArticleController {
         Condition condition = new Condition(Article.class);
         condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
         List<Article> res = articleService.findByCondition(condition);
+
         if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(article.getIdArticle())){
                 throw new BusinessException("你小子没有权限");
         }
+
         article.setArticleStatus("0");
         article.setUpdatedTime(now());
         articleService.update(article);

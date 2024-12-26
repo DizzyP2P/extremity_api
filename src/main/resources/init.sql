@@ -77,11 +77,67 @@ INSERT INTO extremity_article (id, article_title, article_thumbnail_url, article
                                article_tags, article_view_count, article_preview_content, article_comment_count,
                                article_permalink, article_link, created_time, updated_time, article_perfect,
                                article_status, article_thumbs_up_count)
+
+DROP TABLE IF EXISTS `extremity_attachment`;
+CREATE TABLE `extremity_attachment` (
+                                        `article_id` bigint DEFAULT NULL,
+                                        `id` bigint NOT NULL AUTO_INCREMENT,
+                                        `attachment_url` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                        `attachment_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                        PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+DROP TABLE IF EXISTS `extremity_team_user_info`;
+CREATE TABLE `extremity_team_user_info`  (
+                                             `id` int NOT NULL,
+                                             `team_id` int NOT NULL,
+                                             `position` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+                                             `research_direction` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+                                             `research_overview` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+                                             `personal_bio` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL,
+                                             PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+
+DROP TABLE IF EXISTS `extremity_team`;
+CREATE TABLE `extremity_team`  (
+                                   `team_id` int NOT NULL AUTO_INCREMENT,
+                                   `team_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+                                   `research_area` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+                                   `research_field` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+                                   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL,
+                                   `created_at` date NULL DEFAULT NULL,
+                                   PRIMARY KEY (`team_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+CREATE TABLE `extremity_comments` (
+                                      `id` int NOT NULL AUTO_INCREMENT COMMENT '记录id',
+                                      `user_id` bigint NOT NULL COMMENT '用户ID',
+                                      `comment` varchar(3000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL COMMENT '留言内容',
+                                      `article_id` bigint DEFAULT NULL COMMENT '关联主体ID（文章ID）',
+                                      `parent_id` bigint DEFAULT NULL COMMENT '直接父级ID(null为顶级留言ID;子级留言ID)',
+                                      `root_comment_id` int DEFAULT NULL COMMENT '评论ID(区分顶级留言和子留言)',
+                                      `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+                                      `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+                                      `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除(0未删除;1已删除)',
+                                      PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=20240451 DEFAULT CHARSET=utf8mb3 ROW_FORMAT=COMPACT COMMENT='评论留言表';
+
+DROP TABLE IF EXISTS `extremity_user_role`;
+CREATE TABLE `extremity_user_role` (
+                                       `id_user` bigint NOT NULL COMMENT '用户表主键',
+                                       `id_role` bigint NOT NULL COMMENT '角色表主键',
+                                       `created_time` datetime DEFAULT NULL COMMENT '创建时间',
+                                       `activated` int DEFAULT NULL,
+                                       `message` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                                       PRIMARY KEY (`id_user`,`id_role`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户权限表 ';
+
+
 VALUES (1, '给新人的一封信', null, 1, '0', '公告,新手信', 3275,
         '您好，欢迎来到 RYMCU 社区，RYMCU 是一个嵌入式知识学习交流平台。RY 取自”容易”的首字母，寓意为让电子设计变得 so easy。新手的疑问初学者都有很多疑问，在这里对这些疑问进行一一解答。我英语不好，可以学习编程吗？对于初学者来说，英语不是主要的障碍，国内有着充足的中文教程。但在接下来的学习过程中，需要阅读大量的英文文档，所以还是需要有一些英语基础和理解学习能力，配合翻译工具（如百度',
         0, 'http://localhost:3000/article/1', '/article/1', '2020-01-03 01:27:25', '2022-09-26 15:33:03', '0', '0', 7);
-
-
 
 INSERT INTO `extremity_role` (`id`, `name`, `input_code`, `status`, `created_time`, `updated_time`, `weights`) VALUES (1, '高级管理员', 'topop', '0', NULL, NULL, 1);
 INSERT INTO `extremity_role` (`id`, `name`, `input_code`, `status`, `created_time`, `updated_time`, `weights`) VALUES (4, '普通用户', 'user', '0', NULL, NULL, 4);
