@@ -1,16 +1,18 @@
 package com.breech.extremity.web.api.article;
 
+import com.breech.extremity.auth.TokenManager;
 import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.breech.extremity.core.exception.BusinessException;
+import com.breech.extremity.core.exception.UnauthenticatedException;
+import com.breech.extremity.core.exception.UnauthorizedException;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
-import com.breech.extremity.model.Article;
-import com.breech.extremity.model.ArticleContent;
-import com.breech.extremity.model.Attachment;
-import com.breech.extremity.model.User;
+import com.breech.extremity.dto.UserRolesDTO;
+import com.breech.extremity.model.*;
 import com.breech.extremity.service.ArticleContentService;
 import com.breech.extremity.service.ArticleService;
 import com.breech.extremity.service.AttachmentService;
+import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.FileUtils;
 import com.breech.extremity.util.UserUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,6 +20,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +42,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import tk.mybatis.mapper.entity.Example;
 
 import static cn.hutool.core.date.DateTime.now;
 
@@ -53,7 +58,11 @@ public class ArticleController {
     private ArticleContentService articleContentService;
     @Resource
     private AttachmentService attachmentService;
+    @Resource
+    private UserService userService;
 
+    @Resource
+    private TokenManager tokenManager;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -66,9 +75,12 @@ public class ArticleController {
     @Value("${resource.image-url-prefix}")
     private String urlPrefix;
 
+
     @GetMapping("/attachment/{id}")
     @Transactional
     public GlobalResult getAttachments(@PathVariable("id") String draftId) {
+        User currentUser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentUser,draftId);
         Condition cd = new Condition(Attachment.class);
         cd.createCriteria().andEqualTo("articleId", Long.valueOf(draftId));
         List<Attachment> res = attachmentService.findByCondition(cd);
@@ -80,7 +92,6 @@ public class ArticleController {
     public GlobalResult deleteAttachment(@PathVariable("id") String id) {
         User currentUser = UserUtils.getCurrentUserByToken();
         Attachment res = attachmentService.findById(id);
-
         if(res==null){
             throw  new BusinessException("不存在");
         }
@@ -88,9 +99,7 @@ public class ArticleController {
         if(article==null){
             throw  new BusinessException("未知错误");
         }
-        if(!article.getArticleAuthorId().equals(currentUser.getIdUser())){
-            throw  new BusinessException("不是你的attachment");
-        }
+        isAuthorized(currentUser,String.valueOf(article.getIdArticle()));
         attachmentService.deleteById(id);
         FileUtils.delete(fileDownloadUrl+res.getAttachmentUrl());
         return GlobalResultGenerator.genSuccessResult();
@@ -100,7 +109,8 @@ public class ArticleController {
     @Transactional
     public GlobalResult uploadAttachment(@PathVariable("id") String draftId,
                                          @RequestParam("file") MultipartFile file) {
-        // 校验文件是否为空
+        User currentUser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentUser,draftId);
         if (file.isEmpty()) {
             return GlobalResultGenerator.genErrorResult("上传文件不能为空！");
         }
@@ -137,10 +147,13 @@ public class ArticleController {
     @Transactional
     public GlobalResult updateAttachment(@PathVariable("id") String attachmentId,@RequestBody Map<String,Object> attachmentName
                                          ) {
+
         Attachment attachment = attachmentService.findById(attachmentId);
         if(attachment==null){
             throw new BusinessException("没这个附件");
         }
+        User currentUser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentUser,String.valueOf(attachment.getArticleId()));
         attachment.setAttachmentName(attachmentName.get("attachmentName").toString());
         attachmentService.update(attachment);
         return GlobalResultGenerator.genSuccessResult();
@@ -148,8 +161,52 @@ public class ArticleController {
 
     @GetMapping
     public GlobalResult<List<Article>> getAllArticles() {
-        List<Article> articles = articleService.getAllArticles();
+        Condition cd = new Condition(Article.class);
+        cd.createCriteria().andEqualTo("articleStatus", "1");
+        List<Article> articles = articleService.findByCondition(cd);
         return GlobalResultGenerator.genSuccessResult(articles);
+    }
+
+    @GetMapping("/bycatagory")
+    public GlobalResult<PageInfo<Article>> getArticlesByCatagory(
+            @RequestParam String type,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "1") String status,
+            @RequestParam(defaultValue = "12") Integer rows) {
+
+        Condition cd = new Condition(Article.class);
+        Example.Criteria criteria = cd.createCriteria();
+
+        // 判断status是否为1，若是则筛选articleStatus为1或5
+        if ("1".equals(status)) {
+            criteria.andIn("articleStatus", Arrays.asList("1", "5"));
+        } else {
+            if (type == null || type.isEmpty()) {
+                criteria.andEqualTo("articleStatus", status);
+            } else {
+                criteria.andEqualTo("articleStatus", status).andEqualTo("articleType", type);
+            }
+        }
+
+        // 查找符合条件的文章
+        List<Article> articles = articleService.findByCondition(cd);
+
+        // 分页处理
+        PageHelper.startPage(page, rows);
+        PageInfo<Article> pageInfo = new PageInfo<>(articles);
+
+        return GlobalResultGenerator.genSuccessResult(pageInfo);
+    }
+
+    @DeleteMapping("/{articleId}")
+    public GlobalResult<List<Article>> deleteArticle(@PathVariable("articleId") String articleId) {
+        User currentUser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentUser,articleId);
+        Article currentArticle = articleService.findById(articleId);
+        articleService.deleteById(articleId);
+        articleContentService.deleteById(articleId);
+        FileUtils.deleteDirectory(imageDownloadUrl+"/articles/" + articleId);
+        return GlobalResultGenerator.genSuccessResult();
     }
 
     @PostMapping("/Draft")
@@ -172,39 +229,45 @@ public class ArticleController {
     }
 
 
-    //get 一片文章的摘要信息
+    //后台用 get 一片文章的摘要信息
     @GetMapping("/DraftCompendium/{Id}")
     public GlobalResult getArticle(@PathVariable("Id") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
-        Condition condition = new Condition(Article.class);
-        condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
-        List<Article> res = articleService.findByCondition(condition);
-        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
-            throw new BusinessException("你小子没有权限");
-        }
+        isAuthorized(currentuser,draftId);
         Article article = articleService.findById(draftId);
         return GlobalResultGenerator.genSuccessResult(article);
     }
 
-    //get 一片文章的摘要信息
     @GetMapping("/DraftWithAllInfo/{Id}")
+    //preview的时候要用
     public GlobalResult getDraftWithAllInfo(@PathVariable("Id") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
-        Condition condition = new Condition(Article.class);
-        condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
-        List<Article> res = articleService.findByCondition(condition);
+        UserRolesDTO userinfo = tokenManager.getRoles(currentuser.getAccount());
+        if(!(userinfo.getRoleId().contains(2)||userinfo.getRoleId().contains(1))){
+            Condition condition = new Condition(Article.class);
+            condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
+            List<Article> res = articleService.findByCondition(condition);
 
-        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
-            throw new BusinessException("你小子没有权限");
+            if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
+                throw new BusinessException("你小子没有权限");
+            }
         }
         Article article = articleService.findById(draftId);
         ArticleContent at = articleContentService.findById(draftId);
         Map<String,Object> info = objectMapper.convertValue(article, Map.class);
         try{
-            info.put("articleContent",jacksonObjectMapper.readTree(at.getArticleContent()));
+            if(at.getArticleContent()==null){
+                info.put("articleContent"," ");
+            }else{
+                info.put("articleContent",jacksonObjectMapper.readTree(at.getArticleContent()));
+            }
         }
         catch (JsonProcessingException e){
             throw new BusinessException(e.getMessage());
+        }
+
+        if(article.getArticleAuthorId()!=currentuser.getIdUser()){
+            currentuser = userService.findById(String.valueOf(article.getArticleAuthorId()));
         }
         info.put("userId",currentuser.getIdUser());
         info.put("userName",currentuser.getNickname());
@@ -212,8 +275,8 @@ public class ArticleController {
         return GlobalResultGenerator.genSuccessResult(info);
     }
 
-    //post 一片文章的摘要信息
     @PostMapping(value = "/DraftCompendium", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    //修改文章信息的时候要用
     public GlobalResult postCompendium(
             @RequestParam("idArticle") Long idArticle,
             @RequestParam(value = "summary", required = false) String summary,
@@ -224,15 +287,12 @@ public class ArticleController {
         // 1. 校验用户
         User currentUser = UserUtils.getCurrentUserByToken();
 
-        // 2. 根据 idArticle 查出要修改的文章
         Article article = articleService.findById(String.valueOf(idArticle));
         if (article == null) {
             throw new BusinessException("文章不存在");
         }
-        // 确认该文章是当前用户创建的
-        if (!article.getArticleAuthorId().equals(currentUser.getIdUser())) {
-            throw new BusinessException("没有权限");
-        }
+        isAuthorized(currentUser,String.valueOf(idArticle));
+
         // 3. 设置更新字段
         // 如果前端传了 summary，就更新，否则保留原值...
         if (summary != null) {
@@ -276,6 +336,7 @@ public class ArticleController {
 
     @GetMapping("/doAudit/{draftId}")
     @Transactional
+    // 作者发布
     public GlobalResult deliverArticle(@PathVariable("draftId") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
         Condition condition = new Condition(Article.class);
@@ -285,17 +346,52 @@ public class ArticleController {
             throw new BusinessException("你小子没有权限");
         }
         Article article = articleService.findById(draftId);
-        if(!article.getArticleStatus().equals("0")){
+
+        if(article.getArticleStatus().equals("2")){
             throw new BusinessException("文章已经在审核了");
         }
+
         article.setUpdatedTime(now());
         article.setArticleStatus("2");
         articleService.update(article);
         return GlobalResultGenerator.genSuccessResult();
     }
 
+
+    @GetMapping("/hide/{draftId}")
+    @Transactional
+    // 作者取消发布
+    public GlobalResult HideArticle(@PathVariable("draftId") String draftId) {
+        User currentuser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentuser,String.valueOf(draftId));
+        Article article = articleService.findById(draftId);
+        if(!article.getArticleStatus().equals("1")){
+           throw new BusinessException("不能隐藏未发布的文章");
+        }
+        article.setArticleStatus("5");
+        articleService.update(article);
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
+    @GetMapping("/unhide/{draftId}")
+    @Transactional
+    // 作者取消发布
+    public GlobalResult UnHideArticle(@PathVariable("draftId") String draftId) {
+        User currentuser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentuser,String.valueOf(draftId));
+        Article article = articleService.findById(draftId);
+        if(!article.getArticleStatus().equals("5")){
+            throw new BusinessException("不能显示未隐藏的文章");
+        }
+        article.setArticleStatus("1");
+        articleService.update(article);
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
+
     @GetMapping("/undoAudit/{draftId}")
     @Transactional
+    // 作者取消发布
     public GlobalResult undeliverArticle(@PathVariable("draftId") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
         Condition condition = new Condition(Article.class);
@@ -318,9 +414,52 @@ public class ArticleController {
         return GlobalResultGenerator.genSuccessResult();
     }
 
+    @GetMapping("/unshow/{draftId}")
+    @Transactional
+    // 团队管理员打回
+    public GlobalResult unshowArticle(@PathVariable("draftId") String draftId) {
+        Article article = articleService.findById(draftId);
+        if(!article.getArticleStatus().equals("1")){
+            throw new BusinessException("文章状态不对");
+        }
+        article.setUpdatedTime(now());
+        article.setArticleStatus("8");
+        articleService.update(article);
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
+    // 超管拒绝
+    @PostMapping("/reject/{draftId}")
+    @Transactional
+    public GlobalResult rejectRequest(@PathVariable("draftId") String draftId,@RequestBody Map<String,String> rejectInfo) {
+        Article article = articleService.findById(draftId);
+        if(!article.getArticleStatus().equals("2")){
+            throw new BusinessException("文章状态不对");
+        }
+        article.setUpdatedTime(now());
+        article.setArticleStatus("9");
+        article.setRejectMessage(rejectInfo.get("rejcetInfo"));
+        articleService.update(article);
+        return GlobalResultGenerator.genSuccessResult();
+    }
+
+    // 超管同意
+    @GetMapping("/deliver/{draftId}")
+    @Transactional
+    public GlobalResult deliver(@PathVariable("draftId") String draftId) {
+        Article article = articleService.findById(draftId);
+        if(!article.getArticleStatus().equals("2")){
+            throw new BusinessException("文章状态不对");
+        }
+        article.setUpdatedTime(now());
+        article.setArticleStatus("1");
+        articleService.update(article);
+        return GlobalResultGenerator.genSuccessResult();
+    }
 
     @PutMapping("/Draft")
     @Transactional
+    //作者更新自己的文章
     public GlobalResult updateArticle(@RequestBody Article article) {
         User currentuser = UserUtils.getCurrentUserByToken();
         Condition condition = new Condition(Article.class);
@@ -337,10 +476,10 @@ public class ArticleController {
         return GlobalResultGenerator.genSuccessResult();
     }
 
-
     @DeleteMapping("/Draft/{draftId}")
     @Transactional
-    public GlobalResult deleteArticle(@PathVariable("draftId") String draftId) {
+    //作者删除自己的文章
+    public GlobalResult deleteDraft(@PathVariable("draftId") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
         Condition condition = new Condition(Article.class);
         condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
@@ -360,7 +499,10 @@ public class ArticleController {
     }
 
     @GetMapping("/Draft/{draftId}")
+    //获得草稿内容
     public GlobalResult getDrafts(@PathVariable("draftId") String draftId){
+        User currentuser = UserUtils.getCurrentUserByToken();
+        isAuthorized(currentuser,draftId);
         try{
             ArticleContent ct = articleContentService.findById(draftId);
             if(ct.getArticleContent()==null){
@@ -375,6 +517,7 @@ public class ArticleController {
     }
 
     @GetMapping("/{userid}")
+    //只能获得当前用户的所有文章信息
     public GlobalResult getAllArticlesByUserId(){
         User currentuser = UserUtils.getCurrentUserByToken();
         Condition condition = new Condition(Article.class);
@@ -383,6 +526,7 @@ public class ArticleController {
         return GlobalResultGenerator.genSuccessResult(articles);
     }
 
+    //只能给作者或者大佬改
     @PostMapping("/UpdateDraft/{draftId}")
     @Transactional
     public GlobalResult postDrafts(
@@ -392,12 +536,7 @@ public class ArticleController {
     )
     {
         User currentuser = UserUtils.getCurrentUserByToken();
-        Condition condition = new Condition(Article.class);
-        condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
-        List<Article> res = articleService.findByCondition(condition);
-        if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
-            throw new BusinessException("你小子没有权限");
-        }
+        isAuthorized(currentuser,draftId);
         articleContentService.findById(draftId).setUpdatedTime(now());
         articleService.updateArticleContent(Long.valueOf(draftId),contentJson);
         try{
@@ -475,6 +614,18 @@ public class ArticleController {
         if (contentNode != null && contentNode.isArray()) {
             for (JsonNode child : contentNode) {
                 replaceUploadKeyInJson(child, replacedUrlMap);
+            }
+        }
+    }
+
+    private void isAuthorized(User currentuser,String draftId){
+        UserRolesDTO userinfo = tokenManager.getRoles(currentuser.getAccount());
+        log.warn(userinfo.getRoleId().toString());
+
+        if(!(userinfo.getRoleId().contains(2)||userinfo.getRoleId().contains(1))){
+            Article res = articleService.findById(draftId);
+            if(res == null||(res.getArticleAuthorId()!=currentuser.getIdUser())){
+                throw new UnauthorizedException();
             }
         }
     }

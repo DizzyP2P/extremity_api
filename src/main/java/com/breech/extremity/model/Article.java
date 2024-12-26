@@ -35,12 +35,11 @@ public class Article implements Serializable, Cloneable {
     private String articlePerfect;
     private String articlePermalink;
     private String articleLink;
-
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date createdTime;
-
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date updatedTime;
     private String articleStatus;
     private Integer articleThumbsUpCount;
+    private String rejectMessage;
 }
