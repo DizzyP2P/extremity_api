@@ -23,7 +23,7 @@ spring:
     druid:
       url: jdbc:mysql://localhost:3306/extremity?characterEncoding=UTF-8&autoReconnect=true&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
       username: root
-      password: wwyzs
+      password: root
       driver-class-name: com.mysql.cj.jdbc.Driver
 
       # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
@@ -63,5 +63,7 @@ server:
   shutdown: graceful
 resource:
   domain: localhost:3000/frontend/forgetPassword #  网站域名，本地测试时填写前端项目访问地址即可
-  file-download-url: /Users/mac/projects/Extremity/image # 文件下载地址
-  url-prefix: http://localhost:8080/extremity/image # 文件下载地址
+  file-download-url: /Users/mac/projects/Extremity/files # 文件下载地址
+  image-download-url: /Users/mac/projects/Extremity/files/image # 图片下载地址
+  image-url-prefix: http://localhost:8080/extremity/files/image # 图片下载地址
+  fiile-url-prefix: http://localhost:8080/extremity/files # 文件下载地址

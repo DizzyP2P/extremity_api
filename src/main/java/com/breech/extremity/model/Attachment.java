@@ -6,20 +6,16 @@ import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.Date;
+
 
 @Data
-@Table(name = "extremity_comments")
-public class Comment {
+@Table(name = "extremity_attachment")
+public class Attachment {
     @Id
     @GeneratedValue(generator = "JDBC")
     @Column(name = "id")
-    Long id;
-    Long userId;
-    String comment;
-    Long parentId;
-    Integer rootCommentId;
-    Date createdAt;
-    Date updatedAt;
-    Boolean isDeleted;
+    private Long id;
+    private String attachmentUrl;
+    private Long articleId;
+    private String attachmentName;
 }

@@ -22,6 +22,7 @@
         <result column="created_time" jdbcType="DATE" property="createdTime"/>
         <result column="name" jdbcType="VARCHAR" property="roleName"/>
         <result column="activated" jdbcType="INTEGER" property="activated"/>
+        <result column="message" jdbcType="VARCHAR" property="message"/>
         <result column="email" jdbcType="VARCHAR" property="email"/>
         <result column="nickname" jdbcType="VARCHAR" property="nickName"/>
         <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>

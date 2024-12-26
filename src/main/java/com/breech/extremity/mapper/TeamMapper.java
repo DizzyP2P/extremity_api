@@ -30,6 +30,10 @@ public interface TeamMapper extends Mapper<TeamInfo> {
 
     List<User> selectDeactivatedTeamMembers();
 
+    List<User>selectRefusedNormalUsers();
+
+    List<User>selectRefusedTeamMembers();
+
     TeamMemberInfoDTO selectTeamMemberInfoById(@Param("teamMemberId") Integer teamMemberId);
 
     List<User> selectTeamMembers();

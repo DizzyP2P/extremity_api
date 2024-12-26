@@ -21,6 +21,10 @@ public interface TeamService {
 
     List<User>getDeactivatedTeamMembers()throws ServiceException;
 
+    List<User>getRefusedNormalUsers()throws ServiceException;
+
+    List<User>getRefusedTeamMembers()throws ServiceException;
+
     TeamMemberInfoDTO getTeamMemberInfo(Integer teamMemberId) throws ServiceException;
 
     boolean addTeamMemberAccount(User user);

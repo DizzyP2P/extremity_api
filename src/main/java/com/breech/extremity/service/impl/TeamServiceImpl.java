@@ -60,6 +60,16 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
     }
 
     @Override
+    public List<User> getRefusedNormalUsers(){
+        return teamMapper.selectRefusedNormalUsers();
+    }
+
+    @Override
+    public List<User> getRefusedTeamMembers(){
+        return teamMapper.selectRefusedTeamMembers();
+    }
+
+    @Override
     public TeamMemberInfoDTO getTeamMemberInfo(Integer teamMemberId){
         return teamMapper.selectTeamMemberInfoById(teamMemberId);
     }
