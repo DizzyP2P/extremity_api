@@ -85,4 +85,10 @@ public class TeamAdminController {
             return GlobalResultGenerator.genSuccessResult(true);
         }
     }
+
+    @GetMapping("/get-team-members") // 获取团队用户
+    public GlobalResult<List<User>> getTeamMembers() throws Exception {
+        List<User> userList = teamService.getTeamMembers();
+        return GlobalResultGenerator.genSuccessResult(userList);
+    }
 }

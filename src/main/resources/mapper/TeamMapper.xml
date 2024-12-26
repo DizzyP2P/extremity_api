@@ -55,6 +55,7 @@
         <result column="email" jdbcType="VARCHAR" property="email"/>
         <result column="nickname" jdbcType="VARCHAR" property="nickName"/>
         <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
     </resultMap>
 
 
@@ -88,7 +89,7 @@
     </select>
 
     <select id="selectActivatedTeamMembers" resultMap="UserRoleDTOMap">
-        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname,u.real_name
         from extremity_user_role ur
                  join
              extremity_role r
@@ -157,5 +158,19 @@
         join extremity_team_user_info tu ON u.id = tu.id
         join extremity_user_role ur ON ur.id_user = u.id
         where u.id = #{teamMemberId} and ur.activated = 1
+    </select>
+
+    <select id="selectTeamMembers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname,u.real_name,etu.position,u.account
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+                join extremity_team_user_info etu
+            ON u.id = etu.id
+        where ur.activated = 1 AND r.id = 3
     </select>
 </mapper>

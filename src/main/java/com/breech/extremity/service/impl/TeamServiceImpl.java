@@ -84,4 +84,9 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
         userMapper.grantUserRole(user.getIdUser(), 3);
         return true;
     }
+
+    @Override
+    public List<User>getTeamMembers(){
+        return teamMapper.selectTeamMembers();
+    }
 }

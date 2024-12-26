@@ -15,10 +15,9 @@ public class UserRoleDTO {
     private Integer idRole;
     private LocalDateTime createdTime;
     private Integer activated;
-
+    private String realName;
     private String email;
     private String nickName;
     private String avatarUrl;
-
     private String roleName;
 }

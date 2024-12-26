@@ -24,5 +24,5 @@ public interface TeamService {
     TeamMemberInfoDTO getTeamMemberInfo(Integer teamMemberId) throws ServiceException;
 
     boolean addTeamMemberAccount(User user);
-
+    List<User>getTeamMembers();
 }

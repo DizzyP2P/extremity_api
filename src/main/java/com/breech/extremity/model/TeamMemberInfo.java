@@ -33,7 +33,7 @@ public class TeamMemberInfo implements Serializable, Cloneable {
      * 个人简介
      */
     @Column(name = "personal_bio")
-    private Integer personalBio;
+    private String personalBio;
 
     /**
      * 科研介绍

@@ -31,4 +31,6 @@ public interface TeamMapper extends Mapper<TeamInfo> {
     List<User> selectDeactivatedTeamMembers();
 
     TeamMemberInfoDTO selectTeamMemberInfoById(@Param("teamMemberId") Integer teamMemberId);
+
+    List<User> selectTeamMembers();
 }

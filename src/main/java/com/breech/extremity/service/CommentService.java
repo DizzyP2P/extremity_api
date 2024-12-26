@@ -9,4 +9,5 @@ public interface CommentService {
     void addComment(Comment comment);
     List<Comment> getAllComments( long rootCommentId);
     void deleteComment(long commentId);
+    List<Comment> getAllTopCommentsByUser(int userId);
 }

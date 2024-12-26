@@ -11,4 +11,5 @@ public interface CommentMapper extends Mapper<Comment> {
     List<Comment> selectAllComments( @Param("id") long id);
     Comment selectById(@Param("id") long id);
     void insertComment(Comment comment);
+    List<Comment> selectAllTopCommentsByUser(@Param("userId") long id);
 }

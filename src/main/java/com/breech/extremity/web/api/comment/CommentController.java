@@ -30,6 +30,11 @@ public class CommentController {
 
         return GlobalResultGenerator.genSuccessResult(comments);
     }
+    @GetMapping("/userId")
+    public GlobalResult<List<Comment>> getAllTopCommentsByUser(@RequestParam("userId") int userId) {
+        List<Comment> comments = commentService.getAllTopCommentsByUser( userId);
+        return GlobalResultGenerator.genSuccessResult(comments);
+    }
     @PostMapping("/add")
     public GlobalResult<Boolean> insertComment(@RequestBody Comment comment) {
         log.warn(String.valueOf(comment));
