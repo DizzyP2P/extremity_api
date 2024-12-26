@@ -5,6 +5,7 @@ import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.dto.TeamMemberInfoDTO;
 import com.breech.extremity.model.TeamInfo;
+import com.breech.extremity.model.TeamMemberInfo;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.RoleService;
 import com.breech.extremity.service.TeamService;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
 
-// @RolesAllowed({2})
+@RolesAllowed({2})
 @RestController
 @RequestMapping("/api/team-admin")
 public class TeamAdminController {
@@ -40,11 +41,11 @@ public class TeamAdminController {
         return GlobalResultGenerator.genSuccessResult(teamInfo);
     }
 
-//    @GetMapping("/team/delete-user")  // 注销用户账户
-//    public GlobalResult<Boolean> deleteUser(@RequestParam Long idUser) throws Exception{
-//        boolean flag = userService.deleteUser(idUser);
-//        return GlobalResultGenerator.genSuccessResult(flag);
-//    }
+    @GetMapping("delete-user")  // 注销用户账户
+    public GlobalResult<Boolean> deleteUser(@RequestParam Long idUser) throws Exception{
+        boolean flag = userService.deleteUser(idUser);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
 
     @GetMapping("/get-activated-normal-users")  // 获取普通用户（已通过）
     public GlobalResult<List<User>> getActivatedNormalUsers() throws Exception {
@@ -82,15 +83,35 @@ public class TeamAdminController {
         return GlobalResultGenerator.genSuccessResult(userList);
     }
 
+    @GetMapping("/get-delete-users")  // 获取想要注销账号的普通用户
+    public GlobalResult<List<User>> getDeleteUsers() throws Exception {
+        List<User> userList = teamService.getDeleteUsers();
+        return GlobalResultGenerator.genSuccessResult(userList);
+    }
+
     @GetMapping("get-member-info") // 获取团队用户（已认证）的详细信息
     public GlobalResult<TeamMemberInfoDTO> getTeamMemberInfo(@RequestParam("teamMemberId") Integer teamMemberId) throws Exception{
         TeamMemberInfoDTO teamMemberInfoDTO = teamService.getTeamMemberInfo(teamMemberId);
         return  GlobalResultGenerator.genSuccessResult(teamMemberInfoDTO);
     }
 
+    @PostMapping("edit-member-info")// 更新团队成员的信息
+    public GlobalResult<Boolean> getTeamMemberInfo(@RequestBody TeamMemberInfoDTO teamMemberInfoDTO) throws Exception{
+        boolean flag = teamService.editTeamMemberInfo(teamMemberInfoDTO);
+        return  GlobalResultGenerator.genSuccessResult(flag);
+    }
+
     @PostMapping("add-team-member") // 创建团队成员账号并编辑信息 直接通过
     public GlobalResult<Boolean> addTeamMember(@RequestBody User user) throws Exception {
         boolean flag = teamService.addTeamMemberAccount(user);
+
+        TeamMemberInfo teamMemberInfo = new TeamMemberInfo();
+        teamMemberInfo.setUserId(user.getIdUser());
+        teamMemberInfo.setPosition("暂无职位");
+        teamMemberInfo.setPersonalBio("一个平淡的经历...");
+        teamMemberInfo.setResearchDirection("暂无研究方向");
+        teamService.insertTeamMemberAdditionalInfo(teamMemberInfo);
+
         if(!flag){
             return GlobalResultGenerator.genResult(false, null, "账户/邮箱已被注册");
         } else {
@@ -100,15 +121,29 @@ public class TeamAdminController {
 
     @GetMapping("activate-role") // 激活/同意申请
     public GlobalResult<Boolean> activateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
-        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 1);
+        boolean flag = roleService.changeRoleByUserId(idUser, idRole, 1, null);
+        if(idRole == 3){// 如果是想成为团队成员，还需要添加信息
+            TeamMemberInfo teamMemberInfo = new TeamMemberInfo();
+            teamMemberInfo.setUserId(idUser);
+            teamMemberInfo.setPosition("暂无职位");
+            teamMemberInfo.setPersonalBio("一个平淡的经历...");
+            teamMemberInfo.setResearchDirection("暂无研究方向");
+            teamService.insertTeamMemberAdditionalInfo(teamMemberInfo);
+        }
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
     @GetMapping("deactivate-role")  //取消激活    这个没用了
     public GlobalResult<Boolean> deactivateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
-        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 0);
+        boolean flag = roleService.changeRoleByUserId(idUser, idRole, 0, null);
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
     // 拒绝 + 拒绝理由
+    @PostMapping("reject-user")  // 拒绝
+    public GlobalResult<Boolean> reject(@RequestParam Long idUser, @RequestParam Integer idRole, @RequestParam String message) throws Exception {
+        boolean flag = roleService.changeRoleByUserId(idUser, idRole, -1, message);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
 }

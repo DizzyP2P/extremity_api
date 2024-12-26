@@ -29,21 +29,21 @@
     </resultMap>
 
     <resultMap id="TeamMemberInfoDTOMap" type="com.breech.extremity.dto.TeamMemberInfoDTO">
-        <id column="id" property="teamMemberId"/>
-        <result column="account" property="account"/>
-        <result column="nickname" property="nickname"/>
-        <result column="real_name" property="realName"/>
-        <result column="sex" property="sex"/>
-        <result column="avatar_url" property="avatarUrl"/>
-        <result column="email" property="email"/>
-        <result column="phone" property="phone"/>
-        <result column="status" property="status"/>
-        <result column="signature" property="signature"/>
-        <result column="bg_img_url" property="bgImgUrl"/>
-        <result column="position" property="position"/>
-        <result column="research_direction" property="researchDirection"/>
-        <result column="personal_bio" property="personalBio"/>
-        <result column="research_overview" property="researchOverview"/>
+        <id column="id" jdbcType="INTEGER" property="teamMemberId"/>
+        <result column="account" jdbcType="INTEGER" property="account"/>
+        <result column="nickname" jdbcType="VARCHAR" property="nickname"/>
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
+        <result column="sex" jdbcType="VARCHAR" property="sex"/>
+        <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="signature" jdbcType="VARCHAR" property="signature"/>
+        <result column="bg_img_url" jdbcType="VARCHAR" property="bgImgUrl"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="research_direction" jdbcType="VARCHAR" property="researchDirection"/>
+        <result column="personal_bio" jdbcType="VARCHAR" property="personalBio"/>
+        <result column="research_overview" jdbcType="VARCHAR" property="researchOverview"/>
     </resultMap>
 
     <resultMap id="UserRoleDTOMap" type="com.breech.extremity.dto.admin.UserRoleDTO">
@@ -148,6 +148,13 @@
         where ur.activated = -1 AND r.id = 3
     </select>
 
+    <select id="selectDeleteUsers" resultMap="BaseUserMap">
+        select u.*
+        from extremity_user u
+        join extremity_user_role ur ON ur.id_user = u.id
+        where ur.activated = 2
+    </select>
+
 <!--    <select id="selectActivatedNormalUsers" resultMap="BaseUserMap">-->
 <!--        select u.*-->
 <!--        from extremity_user u-->
@@ -176,6 +183,30 @@
 <!--        where ur.id_role=3 and ur.activated=0-->
 <!--    </select>-->
 
+    <update id="updateTeamMemberInfoById">
+        UPDATE extremity_user
+        SET
+            account = #{teamMemberInfo.account},
+            nickname = #{teamMemberInfo.nickname},
+            real_name = #{teamMemberInfo.realName},
+            sex = #{teamMemberInfo.sex},
+            avatar_url = #{teamMemberInfo.avatarUrl},
+            email = #{teamMemberInfo.email},
+            phone = #{teamMemberInfo.phone},
+            status = #{teamMemberInfo.status},
+            signature = #{teamMemberInfo.signature},
+            bg_img_url = #{teamMemberInfo.bgImgUrl}
+        WHERE id = #{teamMemberInfo.teamMemberId};
+
+        UPDATE extremity_team_user_info
+        SET
+            position = #{teamMemberInfo.position},
+            research_direction = #{teamMemberInfo.researchDirection},
+            personal_bio = #{teamMemberInfo.personalBio},
+            research_overview = #{teamMemberInfo.researchOverview}
+        WHERE id = #{teamMemberInfo.teamMemberId};
+    </update>
+
     <select id="selectTeamMemberInfoById" resultMap="TeamMemberInfoDTOMap">
         select u.id, u.account, u.nickname, u.real_name, u.sex, u.avatar_url, u.email, u.phone, u.status, u.signature, u.bg_img_url, tu.position, tu.research_direction, tu.personal_bio, tu.research_overview
         from extremity_user u
@@ -183,4 +214,21 @@
         join extremity_user_role ur ON ur.id_user = u.id
         where u.id = #{teamMemberId} and ur.activated = 1
     </select>
+
+    <insert id="insertTeamMemberAdditionalInfo">
+        INSERT INTO extremity_team_user_info (
+            id,
+            position,
+            research_direction,
+            personal_bio,
+            research_overview
+        )
+        VALUES(
+               #{teamMemberInfo.userId},
+               #{teamMemberInfo.position},
+               #{teamMemberInfo.researchDirection},
+               #{teamMemberInfo.personalBio},
+               #{teamMemberInfo.researchOverview}
+              );
+    </insert>
 </mapper>

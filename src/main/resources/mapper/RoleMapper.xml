@@ -54,9 +54,10 @@
         WHERE u.account = #{account} or u.email = #{account}
     </select>
 
-    <update id = "activateRoleByUserId">
+    <update id = "changeRoleByUserId">
         update extremity_user_role
-        SET activated = #{activated}
+        SET activated = #{activated},
+        message = #{message}
         WHERE id_user = #{idUser} AND id_role = #{idRole};
     </update>
 

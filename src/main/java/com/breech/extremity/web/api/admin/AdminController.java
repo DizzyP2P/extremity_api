@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * @author ronger
  */
-@RolesAllowed({1})
+//@RolesAllowed({1})
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -106,13 +106,13 @@ public class AdminController {
 
     @GetMapping("/user/activate-role") // 激活角色
     public GlobalResult<Boolean> activateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
-        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 1);
+        boolean flag = roleService.changeRoleByUserId(idUser, idRole, 1, null);
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
     @GetMapping("/user/deactivate-role")  //取消激活
     public GlobalResult<Boolean> deactivateRoleByUserId(@RequestParam("idUser") Long idUser, @RequestParam("idRole") Integer idRole) throws Exception {
-        boolean flag = roleService.activateRoleByUserId(idUser, idRole, 0);
+        boolean flag = roleService.changeRoleByUserId(idUser, idRole, 0, null);
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
@@ -167,5 +167,23 @@ public class AdminController {
     public GlobalResult<Boolean> updateUserInfo(@RequestBody UserInfoDTO userInfoDTO) throws Exception{
         boolean flag = userService.updateUserInfo(userInfoDTO);
         return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    @GetMapping("team-admin/allocate-permission")
+    public GlobalResult<Boolean> allocateTeamAdminPermission(@RequestParam("idUser") Long idUser, @RequestParam("permission") Integer permission) throws Exception{
+        boolean flag = userService.allocateTeamAdminPermission(idUser, permission);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    @GetMapping("team-admin/deallocate-permission")
+    public GlobalResult<Boolean> deallocateTeamAdminPermission(@RequestParam("idUser") Long idUser, @RequestParam("permission") Integer permission) throws Exception{
+        boolean flag = userService.deallocateTeamAdminPermission(idUser, permission);
+        return GlobalResultGenerator.genSuccessResult(flag);
+    }
+
+    @GetMapping("team-admin/get-permissions")
+    public GlobalResult<List<Integer>> getTeamAdminPermissions(@RequestParam("idUser") Long idUser) throws Exception{
+        List<Integer> results = userService.getTeamAdminPermissions(idUser);
+        return GlobalResultGenerator.genSuccessResult(results);
     }
 }

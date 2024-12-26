@@ -197,6 +197,12 @@ public interface UserMapper extends Mapper<User> {
 
     UserInfoDTO showUserInfo(@Param("idUser") Long idUser);
 
+    boolean allocateTeamAdminPermission(@Param("idUser") Long idUser, @Param("permission") Integer permission);
+
+    boolean deallocateTeamAdminPermission(@Param("idUser") Long idUser, @Param("permission") Integer permission);
+
+    List<Integer> getTeamAdminPermissions(@Param("idUser") Long idUser);
+
     void updateByEmail(User user);
 
     User selectByEmail(String email);

@@ -15,7 +15,7 @@ public class TeamMemberInfo implements Serializable, Cloneable {
     @Id
     @Column(name = "id")
     @GeneratedValue(generator = "JDBC")
-    private Integer idRole;
+    private Long userId;
 
     /**
      * 角色职位
@@ -33,7 +33,7 @@ public class TeamMemberInfo implements Serializable, Cloneable {
      * 个人简介
      */
     @Column(name = "personal_bio")
-    private Integer personalBio;
+    private String personalBio;
 
     /**
      * 科研介绍
