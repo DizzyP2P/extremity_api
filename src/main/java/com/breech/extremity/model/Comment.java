@@ -14,11 +14,11 @@ public class Comment {
     @Id
     @GeneratedValue(generator = "JDBC")
     @Column(name = "id")
-    long id;
-    long userId;
+    Long id;
+    Long userId;
     String comment;
-    long parentId;
-    int rootCommentId;
+    Long parentId;
+    Integer rootCommentId;
     Date createdAt;
     Date updatedAt;
     Boolean isDeleted;
