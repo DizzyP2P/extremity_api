@@ -17,7 +17,7 @@
 
     <!--    <select id=""-->
     <select id="selectAllTopComments" resultMap="CommentResultMap">
-        select id, user_id, comment,created_at,updated_at
+        select id, user_id, comment,created_at,updated_at,root_comment_id
         from extremity_comments
         where root_comment_id =0
             and is_deleted = 0
