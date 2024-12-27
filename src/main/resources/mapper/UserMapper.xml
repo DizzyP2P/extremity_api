@@ -163,6 +163,23 @@
         WHERE
             u.id = #{idUser};
     </select>
+
+    <insert id="allocateTeamAdminPermission">
+        INSERT INTO extremity_user_permissions (user_id, permission_id)
+        VALUES (#{idUser}, #{permission});
+    </insert>
+
+    <delete id="deallocateTeamAdminPermission">
+        DELETE FROM extremity_user_permissions
+        WHERE user_id = #{idUser} AND permission_id = #{permission};
+    </delete>
+
+    <select id="getTeamAdminPermissions" resultType="Integer">
+        select permission_id
+        from extremity_user_permissions up
+        where up.user_id = #{idUser}
+    </select>
+
     <!-- 根据用户ID修改用户信息 -->
     <update id="updateUserInfo" parameterType="com.breech.extremity.dto.UserInfoDTO">
         UPDATE extremity_user

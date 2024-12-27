@@ -84,7 +84,7 @@ public class RoleServiceImpl extends AbstractService<Role> implements RoleServic
     }
 
     @Override
-    public boolean activateRoleByUserId(Long idUser, Integer idRole, Integer activated) throws ServiceException{
-        return roleMapper.activateRoleByUserId(idUser, idRole, activated);
+    public boolean changeRoleByUserId(Long idUser, Integer idRole, Integer activated, String message) throws ServiceException{
+        return roleMapper.changeRoleByUserId(idUser, idRole, activated, message);
     }
 }

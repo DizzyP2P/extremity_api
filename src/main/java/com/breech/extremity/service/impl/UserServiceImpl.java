@@ -355,6 +355,21 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     }
 
     @Override
+    public boolean allocateTeamAdminPermission(Long idUser, Integer permission) throws ServiceException{
+        return userMapper.allocateTeamAdminPermission(idUser, permission);
+    }
+
+    @Override
+    public boolean deallocateTeamAdminPermission(Long idUser, Integer permission) throws ServiceException{
+        return userMapper.deallocateTeamAdminPermission(idUser, permission);
+    }
+
+    @Override
+    public List<Integer> getTeamAdminPermissions(Long idUser) throws ServiceException{
+        return userMapper.getTeamAdminPermissions(idUser);
+    }
+
+    @Override
     public boolean updateUserInfo(UserInfoDTO userInfoDTO) throws ServiceException{
         return userMapper.updateUserInfo(userInfoDTO);
     }

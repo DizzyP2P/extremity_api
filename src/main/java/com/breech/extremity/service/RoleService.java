@@ -23,6 +23,7 @@ public interface RoleService extends Service<Role> {
 
     Integer getRoleIdByAccount(String account);
 
-    // 激活角色
-    boolean activateRoleByUserId(Long idUer, Integer idRole, Integer activated);
+    // 改变角色
+    boolean changeRoleByUserId(Long idUer, Integer idRole, Integer activated, String message);
+
 }

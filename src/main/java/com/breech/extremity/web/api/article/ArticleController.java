@@ -39,6 +39,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -238,43 +242,48 @@ public class ArticleController {
         return GlobalResultGenerator.genSuccessResult(article);
     }
 
+
     @GetMapping("/DraftWithAllInfo/{Id}")
-    //preview的时候要用
     public GlobalResult getDraftWithAllInfo(@PathVariable("Id") String draftId) {
         User currentuser = UserUtils.getCurrentUserByToken();
-        UserRolesDTO userinfo = tokenManager.getRoles(currentuser.getAccount());
-        if(!(userinfo.getRoleId().contains(2)||userinfo.getRoleId().contains(1))){
-            Condition condition = new Condition(Article.class);
-            condition.createCriteria().andEqualTo("articleAuthorId", currentuser.getIdUser());
-            List<Article> res = articleService.findByCondition(condition);
-
-            if(!res.stream().map(Article::getIdArticle).collect(Collectors.toList()).contains(Long.valueOf(draftId))){
-                throw new BusinessException("你小子没有权限");
-            }
-        }
+        isAuthorized(currentuser, draftId);
         Article article = articleService.findById(draftId);
         ArticleContent at = articleContentService.findById(draftId);
-        Map<String,Object> info = objectMapper.convertValue(article, Map.class);
-        try{
-            if(at.getArticleContent()==null){
-                info.put("articleContent"," ");
-            }else{
-                info.put("articleContent",jacksonObjectMapper.readTree(at.getArticleContent()));
+        Map<String, Object> info = objectMapper.convertValue(article, Map.class);
+
+        try {
+            if (at.getArticleContent() == null) {
+                info.put("articleContent", " ");
+            } else {
+                info.put("articleContent", jacksonObjectMapper.readTree(at.getArticleContent()));
             }
-        }
-        catch (JsonProcessingException e){
+        } catch (JsonProcessingException e) {
             throw new BusinessException(e.getMessage());
         }
 
-        if(article.getArticleAuthorId()!=currentuser.getIdUser()){
+        if (article.getArticleAuthorId().equals(currentuser.getIdUser())){
             currentuser = userService.findById(String.valueOf(article.getArticleAuthorId()));
         }
-        info.put("userId",currentuser.getIdUser());
-        info.put("userName",currentuser.getNickname());
-        info.put("avatarUrl",currentuser.getAvatarUrl());
+
+        // 使用 LocalDateTime 和 DateTimeFormatter 格式化时间戳
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // 将时间戳转换为 LocalDateTime 对象
+        LocalDateTime createdTime = Instant.ofEpochMilli(article.getCreatedTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime updatedTime = Instant.ofEpochMilli(article.getUpdatedTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        // 格式化并加入返回结果
+        info.put("createdTime", createdTime.format(formatter));
+        info.put("updatedTime", updatedTime.format(formatter));
+        info.put("finalShowTime", finalShowTime.format(formatter));
+
+        // 其他信息
+        info.put("userId", currentuser.getIdUser());
+        info.put("userName", currentuser.getNickname());
+        info.put("avatarUrl", currentuser.getAvatarUrl());
+
         return GlobalResultGenerator.genSuccessResult(info);
     }
-
     @PostMapping(value = "/DraftCompendium", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     //修改文章信息的时候要用
     public GlobalResult postCompendium(
@@ -282,6 +291,7 @@ public class ArticleController {
             @RequestParam(value = "summary", required = false) String summary,
             @RequestParam(value = "articleType", required = false) Integer articleType,
             @RequestParam(value = "tags", required = false) String tags,
+            @RequestParam(value = "finaltime", required = false) String date,
             @RequestParam(value = "coverFile", required = false) MultipartFile coverFile
     ) {
         // 1. 校验用户
@@ -306,6 +316,16 @@ public class ArticleController {
         if (tags != null) {
             // 这里简单写法：例如把前端传来的 "tag1,tag2,tag3" 用逗号分隔
             article.setArticleTags(tags);
+        }
+        if(date!=null){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            // 将传递的日期时间字符串解析为 LocalDateTime 对象
+            LocalDateTime parsedDate = LocalDateTime.parse(date, formatter);
+            Date finaldate = Date.from(parsedDate.atZone(ZoneId.systemDefault()).toInstant());
+            // 打印转换后的 Date 对象
+            System.out.println(date); // 输出：Thu Dec 26 00:06:00 CST 2024
+            article.setFinalShowTime(finaldate);
+
         }
         article.setUpdatedTime(now());
 
@@ -350,7 +370,6 @@ public class ArticleController {
         if(article.getArticleStatus().equals("2")){
             throw new BusinessException("文章已经在审核了");
         }
-
         article.setUpdatedTime(now());
         article.setArticleStatus("2");
         articleService.update(article);

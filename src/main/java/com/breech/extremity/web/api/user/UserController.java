@@ -60,7 +60,6 @@ public class UserController {
             @RequestParam("sex") String sex,
             @RequestParam("phone") String phone,
             @RequestParam("email") String email) {
-
         try {
             // 获取当前用户
             User existingUser = UserUtils.getCurrentUserByToken();

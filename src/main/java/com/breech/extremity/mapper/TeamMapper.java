@@ -3,6 +3,7 @@ package com.breech.extremity.mapper;
 import com.breech.extremity.core.mapper.Mapper;
 import com.breech.extremity.dto.TeamMemberInfoDTO;
 import com.breech.extremity.model.TeamInfo;
+import com.breech.extremity.model.TeamMemberInfo;
 import com.breech.extremity.model.User;
 import org.apache.ibatis.annotations.Param;
 
@@ -34,7 +35,13 @@ public interface TeamMapper extends Mapper<TeamInfo> {
 
     List<User>selectRefusedTeamMembers();
 
+    List<User>selectDeleteUsers();
+
+    boolean updateTeamMemberInfoById(@Param("teamMemberInfo")TeamMemberInfoDTO teamMemberInfo);
+
     TeamMemberInfoDTO selectTeamMemberInfoById(@Param("teamMemberId") Integer teamMemberId);
+
+    boolean insertTeamMemberAdditionalInfo(@Param("teamMemberInfo") TeamMemberInfo teamMemberInfo);
 
     List<User> selectTeamMembers();
 }

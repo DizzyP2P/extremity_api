@@ -13,11 +13,11 @@ public class UserRole {
     @Id
     @GeneratedValue(generator = "JDBC")
     @Column(name = "id_user")
-    private int idUser;
+    private Integer idUser;
     @Column(name = "id_role")
-    private int idRole;
+    private Integer idRole;
     @Column(name = "activated")
-    private int activated;
+    private Integer activated;
     @Column(name = "message")
     private String message;
 }

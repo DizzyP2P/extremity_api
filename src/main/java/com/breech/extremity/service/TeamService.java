@@ -3,6 +3,7 @@ package com.breech.extremity.service;
 import com.breech.extremity.core.exception.ServiceException;
 import com.breech.extremity.dto.TeamMemberInfoDTO;
 import com.breech.extremity.model.TeamInfo;
+import com.breech.extremity.model.TeamMemberInfo;
 import com.breech.extremity.model.User;
 
 import java.util.List;
@@ -25,8 +26,15 @@ public interface TeamService {
 
     List<User>getRefusedTeamMembers()throws ServiceException;
 
+    List<User>getDeleteUsers()throws ServiceException;
+
     TeamMemberInfoDTO getTeamMemberInfo(Integer teamMemberId) throws ServiceException;
 
+    boolean editTeamMemberInfo(TeamMemberInfoDTO teamMemberInfoDTO) throws ServiceException;
+
     boolean addTeamMemberAccount(User user);
+
+    boolean insertTeamMemberAdditionalInfo(TeamMemberInfo teamMemberInfo) throws ServiceException;
+
     List<User>getTeamMembers();
 }
