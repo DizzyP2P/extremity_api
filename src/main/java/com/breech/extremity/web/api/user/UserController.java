@@ -5,6 +5,7 @@ import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.core.service.redis.impl.RedisServiceImpl;
 import com.breech.extremity.dto.UserDTO;
 import com.breech.extremity.dto.UserInfoDTO;
+import com.breech.extremity.mapper.UserRoleMapper;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.UserUtils;
@@ -32,6 +33,8 @@ public class UserController {
 
     @Resource
     private UserService userService;
+    @Resource
+    private UserRoleMapper userRoleMapper;
     @GetMapping("/email")
     public GlobalResult<User> findUserDTOByEmail(@RequestParam("email") String email) {
         User user=userService.getUserByEmail(email);
@@ -42,6 +45,12 @@ public class UserController {
     public GlobalResult<UserInfoDTO> findUserDTOById(@RequestParam("id") long id){
         UserInfoDTO user = userService.findUserInfo(id);
         return GlobalResultGenerator.genSuccessResult(user);
+    }
+    @GetMapping("/role")
+    public GlobalResult<Integer> findUserActivated(@RequestParam("email") String email){
+        User user=userService.getUserByEmail(email);
+        int status = userRoleMapper.selectByPrimaryKey(user.getIdUser()).getActivated();
+        return GlobalResultGenerator.genSuccessResult(status);
     }
     @PostMapping("/upload-avatar")
     public GlobalResult<String> uploadAvatar(

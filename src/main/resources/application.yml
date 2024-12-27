@@ -63,7 +63,7 @@ server:
   shutdown: graceful
 resource:
   domain: localhost:3000/frontend/forgetPassword #  网站域名，本地测试时填写前端项目访问地址即可
-  file-download-url: /Users/mac/projects/Extremity/files # 文件下载地址
-  image-download-url: /Users/mac/projects/Extremity/files/image # 图片下载地址
+  file-download-url: /Users/lloyd/IdeaProjects/extremity_api/files # 文件下载地址
+  image-download-url: /Users/lloyd/IdeaProjects/extremity_api/files/image # 图片下载地址
   image-url-prefix: http://localhost:8080/extremity/files/image # 图片下载地址
   fiile-url-prefix: http://localhost:8080/extremity/files # 文件下载地址

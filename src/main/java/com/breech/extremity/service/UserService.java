@@ -164,6 +164,12 @@ public interface UserService extends Service<User> {
 
     UserInfoDTO showUserInfo(Long idUser) throws ServiceException;
 
+    boolean allocateTeamAdminPermission(Long idUser, Integer permission) throws ServiceException;
+
+    boolean deallocateTeamAdminPermission(Long idUser, Integer permission) throws ServiceException;
+
+    List<Integer> getTeamAdminPermissions(Long idUser) throws ServiceException;
+
     void updateUser(User user);
     User getUserByEmail(String email);
 }

@@ -17,7 +17,7 @@ public interface RoleMapper extends Mapper<Role> {
     List<RolesDTO> getAllRoles();
     Integer getRoleByAccount(@Param("account") String account);
 
-    Boolean activateRoleByUserId(@Param("idUser") Long idUser, @Param("idRole") Integer idRole, @Param("activated") Integer activated);
+    Boolean changeRoleByUserId(@Param("idUser") Long idUser, @Param("idRole") Integer idRole, @Param("activated") Integer activated, @Param("message") String message);
 
     UserRoleDTO getUserRoleByUserId(@Param("idUser") Long idUser);
 

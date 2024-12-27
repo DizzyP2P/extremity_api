@@ -29,21 +29,21 @@
     </resultMap>
 
     <resultMap id="TeamMemberInfoDTOMap" type="com.breech.extremity.dto.TeamMemberInfoDTO">
-        <id column="id" property="teamMemberId"/>
-        <result column="account" property="account"/>
-        <result column="nickname" property="nickname"/>
-        <result column="real_name" property="realName"/>
-        <result column="sex" property="sex"/>
-        <result column="avatar_url" property="avatarUrl"/>
-        <result column="email" property="email"/>
-        <result column="phone" property="phone"/>
-        <result column="status" property="status"/>
-        <result column="signature" property="signature"/>
-        <result column="bg_img_url" property="bgImgUrl"/>
-        <result column="position" property="position"/>
-        <result column="research_direction" property="researchDirection"/>
-        <result column="personal_bio" property="personalBio"/>
-        <result column="research_overview" property="researchOverview"/>
+        <id column="id" jdbcType="INTEGER" property="teamMemberId"/>
+        <result column="account" jdbcType="INTEGER" property="account"/>
+        <result column="nickname" jdbcType="VARCHAR" property="nickname"/>
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
+        <result column="sex" jdbcType="VARCHAR" property="sex"/>
+        <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="status" jdbcType="VARCHAR" property="status"/>
+        <result column="signature" jdbcType="VARCHAR" property="signature"/>
+        <result column="bg_img_url" jdbcType="VARCHAR" property="bgImgUrl"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="research_direction" jdbcType="VARCHAR" property="researchDirection"/>
+        <result column="personal_bio" jdbcType="VARCHAR" property="personalBio"/>
+        <result column="research_overview" jdbcType="VARCHAR" property="researchOverview"/>
     </resultMap>
 
     <resultMap id="UserRoleDTOMap" type="com.breech.extremity.dto.admin.UserRoleDTO">
@@ -148,6 +148,13 @@
         where ur.activated = -1 AND r.id = 3
     </select>
 
+    <select id="selectDeleteUsers" resultMap="BaseUserMap">
+        select u.*
+        from extremity_user u
+        join extremity_user_role ur ON ur.id_user = u.id
+        where ur.activated = 2
+    </select>
+
 <!--    <select id="selectActivatedNormalUsers" resultMap="BaseUserMap">-->
 <!--        select u.*-->
 <!--        from extremity_user u-->
@@ -182,5 +189,36 @@
         join extremity_team_user_info tu ON u.id = tu.id
         join extremity_user_role ur ON ur.id_user = u.id
         where u.id = #{teamMemberId} and ur.activated = 1
+    </select>
+
+    <insert id="insertTeamMemberAdditionalInfo">
+        INSERT INTO extremity_team_user_info (
+            id,
+            position,
+            research_direction,
+            personal_bio,
+            research_overview
+        )
+        VALUES(
+               #{teamMemberInfo.userId},
+               #{teamMemberInfo.position},
+               #{teamMemberInfo.researchDirection},
+               #{teamMemberInfo.personalBio},
+               #{teamMemberInfo.researchOverview}
+              );
+    </insert>
+
+    <select id="selectTeamMembers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname,u.real_name,etu.position,u.account
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+                join extremity_team_user_info etu
+            ON u.id = etu.id
+        where ur.activated = 1 AND r.id = 3
     </select>
 </mapper>

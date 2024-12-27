@@ -7,6 +7,7 @@ import com.breech.extremity.mapper.TeamMapper;
 import com.breech.extremity.mapper.UserMapper;
 import com.breech.extremity.model.Role;
 import com.breech.extremity.model.TeamInfo;
+import com.breech.extremity.model.TeamMemberInfo;
 import com.breech.extremity.model.User;
 import com.breech.extremity.service.RoleService;
 import com.breech.extremity.service.TeamService;
@@ -70,8 +71,18 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
     }
 
     @Override
+    public List<User> getDeleteUsers(){
+        return teamMapper.selectDeleteUsers();
+    }
+
+    @Override
     public TeamMemberInfoDTO getTeamMemberInfo(Integer teamMemberId){
         return teamMapper.selectTeamMemberInfoById(teamMemberId);
+    }
+
+    @Override
+    public boolean editTeamMemberInfo(TeamMemberInfoDTO teamMemberInfoDTO){
+        return  teamMapper.updateTeamMemberInfoById(teamMemberInfoDTO);
     }
 
     @Override
@@ -93,5 +104,15 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
         // 授予团队成员身份
         userMapper.grantUserRole(user.getIdUser(), 3);
         return true;
+    }
+
+    @Override
+    public List<User>getTeamMembers(){
+        return teamMapper.selectTeamMembers();
+    }
+
+    @Override
+    public boolean insertTeamMemberAdditionalInfo(TeamMemberInfo teamMemberInfo){
+        return teamMapper.insertTeamMemberAdditionalInfo(teamMemberInfo);
     }
 }

@@ -17,9 +17,9 @@ public class UserRoleDTO {
     private Integer activated;
     private String message;
 
+    private String realName;
     private String email;
     private String nickName;
     private String avatarUrl;
-
     private String roleName;
 }

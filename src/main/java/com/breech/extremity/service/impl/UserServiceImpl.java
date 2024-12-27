@@ -26,7 +26,6 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-
 @Slf4j
 @Service
 public class UserServiceImpl extends AbstractService<User> implements UserService {
@@ -87,7 +86,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                     user.setAvatarUrl(DEFAULT_AVATAR);
                     userMapper.insertSelective(user);
                     user = userMapper.selectByAccount(email);
-                    log.warn(user.toString());
                     Condition condition = new Condition(Role.class);
                     condition.createCriteria().andEqualTo("name",message);
                     List<Role> role = roleMapper.selectByCondition(condition);
@@ -97,7 +95,6 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                    // userMapper.insertUserRole(user.getIdUser(), role.getIdRole(),message,0);
                     redisTemplate.delete(email);
                     return true;
                 }
@@ -355,6 +352,21 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
     @Override
     public UserInfoDTO showUserInfo(Long idUser) throws ServiceException{
         return userMapper.showUserInfo(idUser);
+    }
+
+    @Override
+    public boolean allocateTeamAdminPermission(Long idUser, Integer permission) throws ServiceException{
+        return userMapper.allocateTeamAdminPermission(idUser, permission);
+    }
+
+    @Override
+    public boolean deallocateTeamAdminPermission(Long idUser, Integer permission) throws ServiceException{
+        return userMapper.deallocateTeamAdminPermission(idUser, permission);
+    }
+
+    @Override
+    public List<Integer> getTeamAdminPermissions(Long idUser) throws ServiceException{
+        return userMapper.getTeamAdminPermissions(idUser);
     }
 
     @Override
