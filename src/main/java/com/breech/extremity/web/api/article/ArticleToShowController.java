@@ -124,7 +124,7 @@ public class ArticleToShowController {
                 try {
                     startTime += " 00:00:00"; // 加上起始时间
                     Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime);
-                    criteria.andGreaterThanOrEqualTo("updatedTime", startDate);
+                    criteria.andGreaterThanOrEqualTo("finalShowTime", startDate);
                 } catch (ParseException e) {
                     return GlobalResultGenerator.genErrorResult("Invalid startTime format, expected yyyy-MM-dd HH:mm:ss");
                 }
@@ -133,7 +133,7 @@ public class ArticleToShowController {
                 try {
                     endTime += " 23:59:59"; // 加上结束时间
                     Date endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime);
-                    criteria.andLessThanOrEqualTo("updatedTime", endDate);
+                    criteria.andLessThanOrEqualTo("finalShowTime", endDate);
                 } catch (ParseException e) {
                     return GlobalResultGenerator.genErrorResult("Invalid endTime format, expected yyyy-MM-dd HH:mm:ss");
                 }
