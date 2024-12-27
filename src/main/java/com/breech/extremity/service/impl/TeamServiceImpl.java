@@ -107,6 +107,11 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
     }
 
     @Override
+    public List<User>getTeamMembers(){
+        return teamMapper.selectTeamMembers();
+    }
+
+    @Override
     public boolean insertTeamMemberAdditionalInfo(TeamMemberInfo teamMemberInfo){
         return teamMapper.insertTeamMemberAdditionalInfo(teamMemberInfo);
     }

@@ -183,30 +183,6 @@
 <!--        where ur.id_role=3 and ur.activated=0-->
 <!--    </select>-->
 
-    <update id="updateTeamMemberInfoById">
-        UPDATE extremity_user
-        SET
-            account = #{teamMemberInfo.account},
-            nickname = #{teamMemberInfo.nickname},
-            real_name = #{teamMemberInfo.realName},
-            sex = #{teamMemberInfo.sex},
-            avatar_url = #{teamMemberInfo.avatarUrl},
-            email = #{teamMemberInfo.email},
-            phone = #{teamMemberInfo.phone},
-            status = #{teamMemberInfo.status},
-            signature = #{teamMemberInfo.signature},
-            bg_img_url = #{teamMemberInfo.bgImgUrl}
-        WHERE id = #{teamMemberInfo.teamMemberId};
-
-        UPDATE extremity_team_user_info
-        SET
-            position = #{teamMemberInfo.position},
-            research_direction = #{teamMemberInfo.researchDirection},
-            personal_bio = #{teamMemberInfo.personalBio},
-            research_overview = #{teamMemberInfo.researchOverview}
-        WHERE id = #{teamMemberInfo.teamMemberId};
-    </update>
-
     <select id="selectTeamMemberInfoById" resultMap="TeamMemberInfoDTOMap">
         select u.id, u.account, u.nickname, u.real_name, u.sex, u.avatar_url, u.email, u.phone, u.status, u.signature, u.bg_img_url, tu.position, tu.research_direction, tu.personal_bio, tu.research_overview
         from extremity_user u
@@ -231,4 +207,18 @@
                #{teamMemberInfo.researchOverview}
               );
     </insert>
+
+    <select id="selectTeamMembers" resultMap="UserRoleDTOMap">
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname,u.real_name,etu.position,u.account
+        from extremity_user_role ur
+                 join
+             extremity_role r
+             ON r.id = ur.id_role
+                 join
+             extremity_user u
+             ON u.id = ur.id_user
+                join extremity_team_user_info etu
+            ON u.id = etu.id
+        where ur.activated = 1 AND r.id = 3
+    </select>
 </mapper>

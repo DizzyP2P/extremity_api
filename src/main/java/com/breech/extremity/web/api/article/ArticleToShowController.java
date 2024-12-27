@@ -18,6 +18,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +28,10 @@ import tk.mybatis.mapper.entity.Condition;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -78,18 +82,77 @@ public class ArticleToShowController {
     }
 
     @GetMapping("/bycatagory")
-    public GlobalResult<PageInfo<Article>> getArticlesByCatagory(
-            @RequestParam String type,
+    public GlobalResult<PageInfo<Article>> getArticlesByCategory(
+            @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "12") Integer rows) {
+            @RequestParam(defaultValue = "12") Integer rows,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime) {
+
+        // 创建查询条件
         Condition cd = new Condition(Article.class);
         Example.Criteria criteria = cd.createCriteria();
-        criteria.andEqualTo("articleStatus", "1").andEqualTo("articleType", type);
+
+        // 判断是否传递了 type 参数，决定是否加上 articleType 筛选条件
+        if (StringUtils.isBlank(type)) {
+            criteria.andEqualTo("articleStatus", "1");
+        } else {
+            criteria.andEqualTo("articleStatus", "1").andEqualTo("articleType", type);
+        }
+
+        // 判断是否传递了 startTime 和 endTime 参数，若有则加入时间范围筛选
+        if (StringUtils.isNotBlank(startTime) && StringUtils.isNotBlank(endTime)) {
+            try {
+                startTime += " 00:00:00"; // 加上起始时间
+                endTime += " 23:59:59"; // 加上结束时间
+                // 使用包含时间部分的解析格式
+                Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime);
+                Date endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime);
+
+                // 使用 andBetween 直接添加时间范围条件
+                criteria.andBetween("updatedTime", startDate, endDate);
+            } catch (ParseException e) {
+                return GlobalResultGenerator.genErrorResult("Invalid time format, expected yyyy-MM-dd HH:mm:ss");
+            }
+        } else {
+            // 只传递了 startTime 或 endTime 的情况
+            if (StringUtils.isNotBlank(startTime)) {
+                try {
+                    startTime += " 00:00:00"; // 加上起始时间
+                    Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime);
+                    criteria.andGreaterThanOrEqualTo("updatedTime", startDate);
+                } catch (ParseException e) {
+                    return GlobalResultGenerator.genErrorResult("Invalid startTime format, expected yyyy-MM-dd HH:mm:ss");
+                }
+            }
+            if (StringUtils.isNotBlank(endTime)) {
+                try {
+                    endTime += " 23:59:59"; // 加上结束时间
+                    Date endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime);
+                    criteria.andLessThanOrEqualTo("updatedTime", endDate);
+                } catch (ParseException e) {
+                    return GlobalResultGenerator.genErrorResult("Invalid endTime format, expected yyyy-MM-dd HH:mm:ss");
+                }
+            }
+        }
+
+        // 设置排序规则
+        cd.setOrderByClause("updated_time DESC");
+
+        // 使用 PageHelper 分页，注意调用时要在查询之前调用
+        PageHelper.startPage(page, rows);  // 先启动分页
         List<Article> articles = articleService.findByCondition(cd);
-        PageHelper.startPage(page, rows);
+
+        // 创建 PageInfo 以便于分页结果
         PageInfo<Article> pageInfo = new PageInfo<>(articles);
+
+        // 返回分页结果
         return GlobalResultGenerator.genSuccessResult(pageInfo);
     }
+
+
+
+
 
     @GetMapping("/DraftWithAllInfo/{Id}")
     //preview的时候要用

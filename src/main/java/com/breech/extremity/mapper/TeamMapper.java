@@ -42,4 +42,6 @@ public interface TeamMapper extends Mapper<TeamInfo> {
     TeamMemberInfoDTO selectTeamMemberInfoById(@Param("teamMemberId") Integer teamMemberId);
 
     boolean insertTeamMemberAdditionalInfo(@Param("teamMemberInfo") TeamMemberInfo teamMemberInfo);
+
+    List<User> selectTeamMembers();
 }

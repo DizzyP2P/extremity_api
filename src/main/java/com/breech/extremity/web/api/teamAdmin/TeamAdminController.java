@@ -1,6 +1,5 @@
 package com.breech.extremity.web.api.teamAdmin;
 
-import com.alibaba.fastjson.JSON;
 import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
@@ -191,4 +190,10 @@ public class TeamAdminController {
         return GlobalResultGenerator.genSuccessResult(flag);
     }
 
+
+    @GetMapping("/get-team-members") // 获取团队用户
+    public GlobalResult<List<User>> getTeamMembers() throws Exception {
+        List<User> userList = teamService.getTeamMembers();
+        return GlobalResultGenerator.genSuccessResult(userList);
+    }
 }

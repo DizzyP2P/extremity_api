@@ -40,4 +40,8 @@ public class CommentServiceImpl implements CommentService {
         commentMapper.deleteByPrimaryKey(commentId);
     }
 
+    @Override
+    public List<Comment> getAllTopCommentsByUser(int userId){
+        return commentMapper.selectAllTopCommentsByUser(userId);
+    }
 }
