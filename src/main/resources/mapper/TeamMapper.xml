@@ -208,6 +208,12 @@
               );
     </insert>
 
+    <update id="markDelete">
+        UPDATE extremity_user_role
+        SET activated = 2
+        WHERE id_user = #{idUser};
+    </update>
+
     <update id="updateTeamMemberInfoById">
         UPDATE extremity_user
         SET
