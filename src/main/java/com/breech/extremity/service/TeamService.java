@@ -35,5 +35,6 @@ public interface TeamService {
     boolean addTeamMemberAccount(User user);
 
     boolean insertTeamMemberAdditionalInfo(TeamMemberInfo teamMemberInfo) throws ServiceException;
+
     List<User>getTeamMembers();
 }
