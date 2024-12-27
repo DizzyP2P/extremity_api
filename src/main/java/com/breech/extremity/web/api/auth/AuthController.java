@@ -12,19 +12,19 @@ import com.breech.extremity.dto.TokenUser;
 import com.breech.extremity.dto.UserRegisterInfoDTO;
 import com.breech.extremity.model.Role;
 import com.breech.extremity.model.User;
+import com.breech.extremity.model.UserPermission;
 import com.breech.extremity.service.JavaMailService;
 import com.breech.extremity.service.RoleService;
+import com.breech.extremity.service.UserPermissionService;
 import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.BeanCopierUtil;
 import com.breech.extremity.util.UserUtils;
 import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -39,6 +39,8 @@ public class AuthController {
     private UserService userService;
     @Resource
     TokenManager tokenManager;
+    @Resource
+    UserPermissionService userPermissionService;
 
     @GetMapping("/get-email-code")
     public GlobalResult<Map<String, String>> getEmailCode(@RequestParam("email") String email) throws MessagingException {
@@ -112,6 +114,17 @@ public class AuthController {
         }
         return GlobalResultGenerator.genSuccessResult(NormalResponseMessage.SEND_SUCCESS.getMessage());
     }
+
+    @GetMapping("/getPermissions")
+    public GlobalResult getPermissions(){
+        User user = UserUtils.getCurrentUserByToken();
+        Condition condition  = new Condition(UserPermission.class);
+        condition.createCriteria().andEqualTo("UserId",user.getIdUser());
+        List<UserPermission> permissions = userPermissionService.findByCondition(condition);
+        List<Long> permissionIds = permissions.stream().map(UserPermission::getPermissionId).collect(Collectors.toList());
+        return GlobalResultGenerator.genSuccessResult(permissionIds);
+    }
+
 
     @GetMapping("/user")
     public GlobalResult<JSONObject> user() {
