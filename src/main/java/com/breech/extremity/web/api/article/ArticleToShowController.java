@@ -30,6 +30,10 @@ import tk.mybatis.mapper.entity.Example;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -120,7 +124,7 @@ public class ArticleToShowController {
                 try {
                     startTime += " 00:00:00"; // 加上起始时间
                     Date startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(startTime);
-                    criteria.andGreaterThanOrEqualTo("updatedTime", startDate);
+                    criteria.andGreaterThanOrEqualTo("finalShowTime", startDate);
                 } catch (ParseException e) {
                     return GlobalResultGenerator.genErrorResult("Invalid startTime format, expected yyyy-MM-dd HH:mm:ss");
                 }
@@ -129,7 +133,7 @@ public class ArticleToShowController {
                 try {
                     endTime += " 23:59:59"; // 加上结束时间
                     Date endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endTime);
-                    criteria.andLessThanOrEqualTo("updatedTime", endDate);
+                    criteria.andLessThanOrEqualTo("finalShowTime", endDate);
                 } catch (ParseException e) {
                     return GlobalResultGenerator.genErrorResult("Invalid endTime format, expected yyyy-MM-dd HH:mm:ss");
                 }
@@ -172,6 +176,14 @@ public class ArticleToShowController {
         }
         catch (JsonProcessingException e){
             throw new BusinessException(e.getMessage());
+        }
+        // 使用 LocalDateTime 和 DateTimeFormatter 格式化时间戳
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // 将时间戳转换为 LocalDateTime 对象
+
+        if(article.getFinalShowTime()!=null){
+            LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            info.put("finalShowTime", finalShowTime.format(formatter));
         }
         User us = userService.findById(String.valueOf(article.getArticleAuthorId()));
         info.put("userId",us.getIdUser());

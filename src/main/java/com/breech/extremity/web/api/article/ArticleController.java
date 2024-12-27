@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -181,11 +182,16 @@ public class ArticleController {
         Condition cd = new Condition(Article.class);
         Example.Criteria criteria = cd.createCriteria();
 
-        // 判断status是否为1，若是则筛选articleStatus为1或5
+        PageHelper.startPage(page, rows);
+
         if ("1".equals(status)) {
-            criteria.andIn("articleStatus", Arrays.asList("1", "5"));
+            if(StringUtils.isBlank(type)){
+                criteria.andIn("articleStatus", Arrays.asList("1", "5"));
+            }else{
+                criteria.andIn("articleStatus", Arrays.asList("1", "5")).andEqualTo("articleType", type);
+            }
         } else {
-            if (type == null || type.isEmpty()) {
+            if (StringUtils.isBlank(type)) {
                 criteria.andEqualTo("articleStatus", status);
             } else {
                 criteria.andEqualTo("articleStatus", status).andEqualTo("articleType", type);
@@ -194,9 +200,7 @@ public class ArticleController {
 
         // 查找符合条件的文章
         List<Article> articles = articleService.findByCondition(cd);
-
         // 分页处理
-        PageHelper.startPage(page, rows);
         PageInfo<Article> pageInfo = new PageInfo<>(articles);
 
         return GlobalResultGenerator.genSuccessResult(pageInfo);
@@ -270,13 +274,15 @@ public class ArticleController {
         // 将时间戳转换为 LocalDateTime 对象
         LocalDateTime createdTime = Instant.ofEpochMilli(article.getCreatedTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
         LocalDateTime updatedTime = Instant.ofEpochMilli(article.getUpdatedTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        if(article.getFinalShowTime()!=null){
+            LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            info.put("finalShowTime", finalShowTime.format(formatter));
+        }
 
         // 格式化并加入返回结果
         info.put("createdTime", createdTime.format(formatter));
         info.put("updatedTime", updatedTime.format(formatter));
-        info.put("finalShowTime", finalShowTime.format(formatter));
-
         // 其他信息
         info.put("userId", currentuser.getIdUser());
         info.put("userName", currentuser.getNickname());

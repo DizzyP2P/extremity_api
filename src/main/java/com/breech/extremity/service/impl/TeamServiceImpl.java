@@ -112,6 +112,11 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
     }
 
     @Override
+    public boolean markDelete(Long idUser){
+        return teamMapper.markDelete(idUser);
+    }
+
+    @Override
     public boolean insertTeamMemberAdditionalInfo(TeamMemberInfo teamMemberInfo){
         return teamMapper.insertTeamMemberAdditionalInfo(teamMemberInfo);
     }
