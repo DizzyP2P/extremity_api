@@ -30,6 +30,10 @@ import tk.mybatis.mapper.entity.Example;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -172,6 +176,14 @@ public class ArticleToShowController {
         }
         catch (JsonProcessingException e){
             throw new BusinessException(e.getMessage());
+        }
+        // 使用 LocalDateTime 和 DateTimeFormatter 格式化时间戳
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        // 将时间戳转换为 LocalDateTime 对象
+
+        if(article.getFinalShowTime()!=null){
+            LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            info.put("finalShowTime", finalShowTime.format(formatter));
         }
         User us = userService.findById(String.valueOf(article.getArticleAuthorId()));
         info.put("userId",us.getIdUser());

@@ -270,13 +270,15 @@ public class ArticleController {
         // 将时间戳转换为 LocalDateTime 对象
         LocalDateTime createdTime = Instant.ofEpochMilli(article.getCreatedTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
         LocalDateTime updatedTime = Instant.ofEpochMilli(article.getUpdatedTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        if(article.getFinalShowTime()!=null){
+            LocalDateTime finalShowTime = Instant.ofEpochMilli(article.getFinalShowTime().getTime()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            info.put("finalShowTime", finalShowTime.format(formatter));
+        }
 
         // 格式化并加入返回结果
         info.put("createdTime", createdTime.format(formatter));
         info.put("updatedTime", updatedTime.format(formatter));
-        info.put("finalShowTime", finalShowTime.format(formatter));
-
         // 其他信息
         info.put("userId", currentuser.getIdUser());
         info.put("userName", currentuser.getNickname());
