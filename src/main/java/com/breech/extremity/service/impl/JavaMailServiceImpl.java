@@ -117,6 +117,7 @@ public class JavaMailServiceImpl implements JavaMailService {
             String url = BASE_URL+ "/" + code;
             redisService.set(code, to, 15 * 60);
             String thymeleafTemplatePath = "mail/forgetPasswordTemplate";
+
             thymeleafTemplateVariable.put("url", url);
 
             sendTemplateEmail(USERNAME,
