@@ -1,5 +1,6 @@
 package com.breech.extremity.web.api.teamAdmin;
 
+import com.alibaba.fastjson.JSON;
 import com.breech.extremity.auth.annotation.RolesAllowed;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
@@ -111,37 +112,39 @@ public class TeamAdminController {
 
     @PostMapping("edit-member-info")// 更新团队成员的信息
     public GlobalResult<Boolean> getTeamMemberInfo(@RequestParam String teamMemberInfoDTO, @RequestParam(value = "file", required = false) MultipartFile file, @RequestParam(value = "file2", required = false) MultipartFile file2) throws Exception{
+        // System.out.println(teamMemberInfoDTO);
         TeamMemberInfoDTO teamMemberInfoDTO1 = JSON.parseObject(teamMemberInfoDTO, TeamMemberInfoDTO.class);
 
         // 验证文件名有效性
-        String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || originalFilename.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "文件名无效");
-        }
-
-        // 创建上传目录
-        File uploadDir = new File(fileDownloadUrl);
-        if (!uploadDir.exists() && !uploadDir.mkdirs()) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "无法创建上传目录");
-        }
-
-        // 删除旧头像文件
-        String oldAvatarUrl = teamMemberInfoDTO1.getAvatarUrl();
-        if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
-            File oldFile = new File(uploadDir, oldAvatarUrl);
-            if (oldFile.exists() && !oldFile.delete()) {
-                logger.error("删除旧头像文件失败: " + oldAvatarUrl);
+        if(file != null) {
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null || originalFilename.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "文件名无效");
             }
+
+            // 创建上传目录
+            File uploadDir = new File(fileDownloadUrl);
+            if (!uploadDir.exists() && !uploadDir.mkdirs()) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "无法创建上传目录");
+            }
+
+            // 删除旧头像文件
+            String oldAvatarUrl = teamMemberInfoDTO1.getAvatarUrl();
+            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+                File oldFile = new File(uploadDir, oldAvatarUrl);
+                if (oldFile.exists() && !oldFile.delete()) {
+                    logger.error("删除旧头像文件失败: " + oldAvatarUrl);
+                }
+            }
+
+            // 保存新头像文件
+            String newFilename = UUID.randomUUID() + "_" + originalFilename;
+            File newFile = new File(uploadDir, newFilename);
+            file.transferTo(newFile);
+
+            teamMemberInfoDTO1.setAvatarUrl(newFilename);
         }
-
-        // 保存新头像文件
-        String newFilename = UUID.randomUUID() + "_" + originalFilename;
-        File newFile = new File(uploadDir, newFilename);
-        file.transferTo(newFile);
-
-        teamMemberInfoDTO1.setAvatarUrl(newFilename);
         boolean flag = teamService.editTeamMemberInfo(teamMemberInfoDTO1);
-
         return  GlobalResultGenerator.genSuccessResult(flag);
     }
 

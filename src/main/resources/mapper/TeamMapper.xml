@@ -208,6 +208,30 @@
               );
     </insert>
 
+    <update id="updateTeamMemberInfoById">
+        UPDATE extremity_user
+        SET
+            account = #{teamMemberInfo.account},
+            nickname = #{teamMemberInfo.nickname},
+            real_name = #{teamMemberInfo.realName},
+            sex = #{teamMemberInfo.sex},
+            avatar_url = #{teamMemberInfo.avatarUrl},
+            email = #{teamMemberInfo.email},
+            phone = #{teamMemberInfo.phone},
+            status = #{teamMemberInfo.status},
+            signature = #{teamMemberInfo.signature},
+            bg_img_url = #{teamMemberInfo.bgImgUrl}
+        WHERE id = #{teamMemberInfo.teamMemberId};
+
+        UPDATE extremity_team_user_info
+        SET
+            position = #{teamMemberInfo.position},
+            research_direction = #{teamMemberInfo.researchDirection},
+            personal_bio = #{teamMemberInfo.personalBio},
+            research_overview = #{teamMemberInfo.researchOverview}
+        WHERE id = #{teamMemberInfo.teamMemberId};
+    </update>
+
     <select id="selectTeamMembers" resultMap="UserRoleDTOMap">
         select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, u.email, u.avatar_url, u.nickname,u.real_name,etu.position,u.account
         from extremity_user_role ur
