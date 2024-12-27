@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
 
-@RolesAllowed({2})
 @RestController
 @RequestMapping("/api/team-admin")
 public class TeamAdminController {

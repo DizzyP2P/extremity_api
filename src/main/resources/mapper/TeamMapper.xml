@@ -53,6 +53,7 @@
         <result column="name" jdbcType="VARCHAR" property="roleName"/>
         <result column="activated" jdbcType="INTEGER" property="activated"/>
         <result column="message" jdbcType="VARCHAR" property="message"/>
+        <result column="real_name" jdbcType="VARCHAR" property="realName"/>
         <result column="email" jdbcType="VARCHAR" property="email"/>
         <result column="nickname" jdbcType="VARCHAR" property="nickName"/>
         <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl"/>
@@ -89,7 +90,7 @@
     </select>
 
     <select id="selectActivatedTeamMembers" resultMap="UserRoleDTOMap">
-        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname
+        select ur.id_user, ur.id_role, ur.created_time, r.name ,ur.activated, ur.message, u.email, u.avatar_url, u.nickname,u.real_name
         from extremity_user_role ur
                  join
              extremity_role r
