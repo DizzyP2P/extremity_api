@@ -152,7 +152,13 @@
     <!-- 删除账号 -->
     <delete id="deleteUser">
         DELETE FROM extremity_user
-        WHERE id = #{idUser}
+        WHERE id = #{idUser};
+
+        DELETE FROM extremity_user_role
+        WHERE id_user = #{idUser};
+
+        DELETE FROM extremity_team_user_info
+        WHERE id = #{idUser};
     </delete>
     <!-- 显示用户详细信息 -->
     <select id="showUserInfo" resultMap="UserInfoResultMapper">

@@ -16,8 +16,11 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @Service
 public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamService {
@@ -86,12 +89,17 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
     }
 
     @Override
-    public boolean addTeamMemberAccount(User user){
+    public String addTeamMemberAccount(User user){
         // 账号和邮箱都不能重复
         if(userMapper.selectUserByAccountAndEmail(user.getAccount(), user.getEmail()) != null){
-            return false;
+            return null;
         }
-        // 特殊处理
+        // 生成基于邮箱的密码
+        String password = generatePasswordFromEmail(user.getEmail());
+        // System.out.println("随机生成的密码：" + password);
+        user.setPassword(password);
+
+        // 特殊处理 密码加密
         String nickname = user.getEmail().split("@")[0];
         user.setNickname(nickname);
         user.setPassword(Utils.entryptPassword(user.getPassword())); // 密码加密
@@ -103,8 +111,28 @@ public class TeamServiceImpl extends AbstractService<TeamInfo> implements TeamSe
 
         // 授予团队成员身份
         userMapper.grantUserRole(user.getIdUser(), 3);
-        return true;
+        return password;
     }
+
+    // 通过邮箱生成确定性密码
+    private String generatePasswordFromEmail(String email) {
+        try {
+            // 使用SHA-256算法生成哈希值
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(email.getBytes());
+
+            // 取哈希值的前12个字符作为密码
+            StringBuilder password = new StringBuilder();
+            for (int i = 0; i < 12; i++) {
+                password.append(String.format("%02x", hash[i % hash.length]));  // 格式化为十六进制
+            }
+
+            return password.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating password from email", e);
+        }
+    }
+
 
     @Override
     public List<User>getTeamMembers(){
