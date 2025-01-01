@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-
+@RolesAllowed({2})
 @RestController
 @RequestMapping("/api/team-admin")
 public class TeamAdminController {

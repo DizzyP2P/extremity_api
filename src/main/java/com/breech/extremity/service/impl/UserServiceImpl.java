@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Condition;
 
 import javax.annotation.Resource;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -313,11 +315,16 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addUser(User user){
+    public String addUser(User user){
         // 账号和邮箱都不能重复
         if(userMapper.selectUserByAccountAndEmail(user.getAccount(), user.getEmail()) != null){
-            return false;
+            return null;
         }
+        // 生成基于邮箱的密码
+        String password = generatePasswordFromEmail(user.getEmail());
+        // System.out.println("随机生成的密码：" + password);
+
+        user.setPassword(password);
         // 特殊处理
         String nickname = user.getEmail().split("@")[0];
         user.setNickname(nickname);
@@ -331,7 +338,26 @@ public class UserServiceImpl extends AbstractService<User> implements UserServic
 
         // 授予团队管理员身份
         userMapper.grantUserRole(user.getIdUser(), 2);
-        return true;
+        return password;
+    }
+
+    // 通过邮箱生成确定性密码
+    private String generatePasswordFromEmail(String email) {
+        try {
+            // 使用SHA-256算法生成哈希值
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(email.getBytes());
+
+            // 取哈希值的前12个字符作为密码
+            StringBuilder password = new StringBuilder();
+            for (int i = 0; i < 12; i++) {
+                password.append(String.format("%02x", hash[i % hash.length]));  // 格式化为十六进制
+            }
+
+            return password.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error generating password from email", e);
+        }
     }
 
     @Override

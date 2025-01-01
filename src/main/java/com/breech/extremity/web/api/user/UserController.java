@@ -5,8 +5,11 @@ import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.core.service.redis.impl.RedisServiceImpl;
 import com.breech.extremity.dto.UserDTO;
 import com.breech.extremity.dto.UserInfoDTO;
+import com.breech.extremity.mapper.TeamMapper;
 import com.breech.extremity.mapper.UserRoleMapper;
+import com.breech.extremity.model.TeamInfo;
 import com.breech.extremity.model.User;
+import com.breech.extremity.service.TeamService;
 import com.breech.extremity.service.UserService;
 import com.breech.extremity.util.UserUtils;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,7 @@ import org.slf4j.Logger;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -35,6 +39,10 @@ public class UserController {
     private UserService userService;
     @Resource
     private UserRoleMapper userRoleMapper;
+
+    @Resource
+    private TeamService teamService;
+
     @GetMapping("/email")
     public GlobalResult<User> findUserDTOByEmail(@RequestParam("email") String email) {
         User user=userService.getUserByEmail(email);
@@ -117,4 +125,18 @@ public class UserController {
             return GlobalResultGenerator.genErrorResult("更新信息失败");
         }
     }
+
+
+    @GetMapping("/show-info") // 获取团队信息
+    public GlobalResult<TeamInfo> showTeamInfo(@RequestParam("teamId") Integer teamId) throws Exception {
+        TeamInfo teamInfo = teamService.selectTeamInfo(teamId);
+        return GlobalResultGenerator.genSuccessResult(teamInfo);
+    }
+
+    @GetMapping("/get-activated-team-members") // 获取团队用户（已通过）
+    public GlobalResult<List<User>> getActivatedTeamMembers() throws Exception {
+        List<User> userList = teamService.getActivatedTeamMembers();
+        return GlobalResultGenerator.genSuccessResult(userList);
+    }
+
 }
