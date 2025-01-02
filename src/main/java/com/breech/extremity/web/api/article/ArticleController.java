@@ -109,7 +109,7 @@ public class ArticleController {
         FileUtils.delete(fileDownloadUrl+res.getAttachmentUrl());
         return GlobalResultGenerator.genSuccessResult();
     }
-
+    
     @PostMapping("/attachment/{id}")
     @Transactional
     public GlobalResult uploadAttachment(@PathVariable("id") String draftId,

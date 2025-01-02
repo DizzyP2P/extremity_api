@@ -15,8 +15,8 @@ public class CommentServiceImpl implements CommentService {
     private CommentMapper commentMapper;
 
     @Override
-    public List<Comment> getAllTopComments() {
-        return commentMapper.selectAllTopComments();
+    public List<Comment> getAllTopComments(long articleId) {
+        return commentMapper.selectAllTopComments(articleId);
     }
 
     @Override
@@ -24,15 +24,15 @@ public class CommentServiceImpl implements CommentService {
         commentMapper.insertComment(comment);
     }
     @Override
-    public List<Comment> getAllComments( long rootCommentId){
-        return commentMapper.selectAllComments(rootCommentId);
+    public List<Comment> getAllComments( long rootCommentId,long articleId){
+        return commentMapper.selectAllComments(rootCommentId,articleId);
     }
 
     @Override
     public void deleteComment(long commentId){
         Comment comment = commentMapper.selectById(commentId);
         if(comment.getRootCommentId()==0){
-            List<Comment> comments = commentMapper.selectAllComments(commentId);
+            List<Comment> comments = commentMapper.selectAllComments(commentId,1);
             for(Comment c : comments){
                 commentMapper.deleteByPrimaryKey(c.getId());
             }

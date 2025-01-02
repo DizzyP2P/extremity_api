@@ -16,18 +16,21 @@
     </resultMap>
 
     <!--    <select id=""-->
-    <select id="selectAllTopComments" resultMap="CommentResultMap">
-        select id, user_id, comment,created_at,updated_at,root_comment_id
+    <select id="selectAllTopComments" parameterType="long" resultMap="CommentResultMap">
+
+        select id, user_id, comment,created_at,updated_at,root_comment_id,article_id
         from extremity_comments
         where root_comment_id =0
             and is_deleted = 0
+            and article_id = #{articleId}
         order by created_at desc;
     </select>
-    <select id="selectAllComments" parameterType="long" resultMap="CommentResultMap">
-        select id, user_id, comment,created_at,updated_at,parent_id,root_comment_id
+    <select id="selectAllComments" parameterType="map" resultMap="CommentResultMap">
+        select id, user_id, comment,created_at,updated_at,parent_id,root_comment_id,article_id
         from extremity_comments
         where root_comment_id = #{id}
             and is_deleted = 0
+            and article_id = #{articleId}
         order by created_at desc;
     </select>
     <select id="selectById" parameterType="long" resultMap="CommentResultMap">

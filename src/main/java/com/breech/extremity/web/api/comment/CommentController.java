@@ -19,14 +19,14 @@ public class CommentController {
     private CommentService commentService;
 
     @GetMapping("/articleId")
-    public GlobalResult<List<Comment>> getAllTopComment() {
-        List<Comment> comments = commentService.getAllTopComments();
+    public GlobalResult<List<Comment>> getAllTopComment(@RequestParam Long articleId) {
+        List<Comment> comments = commentService.getAllTopComments(articleId);
 
         return GlobalResultGenerator.genSuccessResult(comments);
     }
     @GetMapping("/commentId")
-    public GlobalResult<List<Comment>> getAllComments(@RequestParam("commentId") int commentId) {
-        List<Comment> comments = commentService.getAllComments( commentId);
+    public GlobalResult<List<Comment>> getAllComments(@RequestParam("commentId") int commentId,@RequestParam Long articleId) {
+        List<Comment> comments = commentService.getAllComments( commentId, articleId);
 
         return GlobalResultGenerator.genSuccessResult(comments);
     }
