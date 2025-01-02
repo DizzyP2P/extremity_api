@@ -38,6 +38,7 @@ public class CommentController {
     @PostMapping("/add")
     public GlobalResult<Boolean> insertComment(@RequestBody Comment comment) {
         log.warn(String.valueOf(comment));
+        System.out.println(comment.getArticleId());
         commentService.addComment(comment);
         return GlobalResultGenerator.genSuccessResult(true);
     }

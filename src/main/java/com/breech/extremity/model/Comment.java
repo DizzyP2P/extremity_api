@@ -22,4 +22,5 @@ public class Comment {
     Date createdAt;
     Date updatedAt;
     Boolean isDeleted;
+    Long articleId;
 }
