@@ -43,5 +43,7 @@ public interface TeamMapper extends Mapper<TeamInfo> {
 
     boolean insertTeamMemberAdditionalInfo(@Param("teamMemberInfo") TeamMemberInfo teamMemberInfo);
 
+    boolean markDelete(@Param("idUser") Long idUser);
+
     List<User> selectTeamMembers();
 }

@@ -57,6 +57,11 @@ public class JavaMailServiceImpl implements JavaMailService {
     }
 
     @Override
+    public Integer sendPassword(String email, String password) throws MessagingException{
+        return sendPassword2(email, password);
+    }
+
+    @Override
     public Integer sendForgetPasswordEmail(String email) throws MessagingException {
         return sendCode(email, 1);
     }
@@ -129,6 +134,28 @@ public class JavaMailServiceImpl implements JavaMailService {
             return 1;
         }
         return 0;
+    }
+
+    private Integer sendPassword2(String to, String password) throws MessagingException {
+        Properties props = new Properties();
+        // 表示SMTP发送邮件，需要进行身份验证
+        props.put("mail.smtp.auth", true);
+        props.put("mail.smtp.ssl.enable", true);
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.port", SERVER_PORT);
+        props.put("mail.user", USERNAME);
+        props.put("mail.password", PASSWORD);
+        mailSender.setJavaMailProperties(props);
+        Map<String, Object> thymeleafTemplateVariable = new HashMap<String, Object>(1);
+        thymeleafTemplateVariable.put("password", password);
+        String thymeleafTemplatePath = "mail/allocateAccountPassword";
+        sendTemplateEmail(USERNAME,
+                new String[]{to},
+                new String[]{},
+                "Extremity 账号密码",
+                thymeleafTemplatePath,
+                thymeleafTemplateVariable);
+        return 1;
     }
 
     /**

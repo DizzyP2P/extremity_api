@@ -32,9 +32,11 @@ public interface TeamService {
 
     boolean editTeamMemberInfo(TeamMemberInfoDTO teamMemberInfoDTO) throws ServiceException;
 
-    boolean addTeamMemberAccount(User user);
+    String addTeamMemberAccount(User user);
 
     boolean insertTeamMemberAdditionalInfo(TeamMemberInfo teamMemberInfo) throws ServiceException;
+
+    boolean markDelete(Long idUser) throws ServiceException;
 
     List<User>getTeamMembers();
 }

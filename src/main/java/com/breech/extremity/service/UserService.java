@@ -156,7 +156,7 @@ public interface UserService extends Service<User> {
     */
     Map<String,List<UserDTO>> getGroupedUsersByRoleList(List<Integer> roleIds);
 
-    boolean addUser(User user);
+    String addUser(User user);
     boolean grantUserRole(Long idUser, Integer idRole) throws ServiceException;
     boolean revokeUserRole(Long idUser, Integer idRole) throws ServiceException;
 

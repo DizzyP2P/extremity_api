@@ -14,6 +14,8 @@ public interface JavaMailService {
      */
     Integer sendEmailCode(String email) throws MessagingException;
 
+    Integer sendPassword(String email, String password) throws MessagingException;
+
     /**
      * 发送找回密码邮件
      *

@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * @author ronger
  */
-//@RolesAllowed({1})
+@RolesAllowed({1})
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -29,6 +29,8 @@ public class AdminController {
     private UserService userService;
     @Resource
     private RoleService roleService;
+    @Resource
+    private JavaMailService javaMailService;
 
     @GetMapping("/users")  // 所有用户 所有角色都返回
     public GlobalResult<PageInfo<UserInfoDTO>> users(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer rows, UserSearchDTO searchDTO) {
@@ -96,8 +98,12 @@ public class AdminController {
 
     @PostMapping("/user/add-user") // 管理员直接创建用户（团队管理员 直接激活，但是没有额外权限）
     public GlobalResult<Boolean> addUser(@RequestBody User user) throws Exception{
-        boolean flag = userService.addUser(user);
-        if(!flag){
+        String password = userService.addUser(user);
+
+        // 发送密码至邮箱
+        Integer result = javaMailService.sendPassword(user.getEmail(), password);
+
+        if(password == null) {
             return GlobalResultGenerator.genResult(false, null, "账户/邮箱已被注册");
         } else {
             return GlobalResultGenerator.genSuccessResult(true);

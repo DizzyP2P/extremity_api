@@ -2,13 +2,16 @@ package com.breech.extremity.web.api.teamAdmin;
 
 import com.alibaba.fastjson.JSON;
 import com.breech.extremity.auth.annotation.RolesAllowed;
+import com.breech.extremity.core.exception.AccountExistsException;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
+import com.breech.extremity.core.response.NormalResponseMessage;
 import com.breech.extremity.core.service.redis.impl.RedisServiceImpl;
 import com.breech.extremity.dto.TeamMemberInfoDTO;
 import com.breech.extremity.model.TeamInfo;
 import com.breech.extremity.model.TeamMemberInfo;
 import com.breech.extremity.model.User;
+import com.breech.extremity.service.JavaMailService;
 import com.breech.extremity.service.RoleService;
 import com.breech.extremity.service.TeamService;
 import com.breech.extremity.service.UserService;
@@ -21,11 +24,12 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-
-import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
 
 @RolesAllowed({2})
 @RestController
@@ -37,6 +41,8 @@ public class TeamAdminController {
     private RoleService roleService;
     @Resource
     private TeamService teamService;
+    @Resource
+    private JavaMailService javaMailService;
 
     @Value("${resource.image-download-url}")
     private String fileDownloadUrl;
@@ -150,8 +156,11 @@ public class TeamAdminController {
 
     @PostMapping("add-team-member") // 创建团队成员账号并编辑信息 直接通过
     public GlobalResult<Boolean> addTeamMember(@RequestBody User user) throws Exception {
-        boolean flag = teamService.addTeamMemberAccount(user);
-
+        // 创建账号基本信息
+        String password = teamService.addTeamMemberAccount(user);
+        // 发送密码至邮箱
+        Integer result = javaMailService.sendPassword(user.getEmail(), password);
+        // 添加附加信息
         TeamMemberInfo teamMemberInfo = new TeamMemberInfo();
         teamMemberInfo.setUserId(user.getIdUser());
         teamMemberInfo.setPosition("暂无职位");
@@ -159,7 +168,7 @@ public class TeamAdminController {
         teamMemberInfo.setResearchDirection("暂无研究方向");
         teamService.insertTeamMemberAdditionalInfo(teamMemberInfo);
 
-        if(!flag){
+        if(password == null || password.isEmpty()) {
             return GlobalResultGenerator.genResult(false, null, "账户/邮箱已被注册");
         } else {
             return GlobalResultGenerator.genSuccessResult(true);
