@@ -44,4 +44,8 @@ public class CommentServiceImpl implements CommentService {
     public List<Comment> getAllTopCommentsByUser(int userId){
         return commentMapper.selectAllTopCommentsByUser(userId);
     }
+    @Override
+    public   List<Comment> getAllTopCommentsByComment(long ComentId){
+        return commentMapper.selectComments(ComentId);
+    }
 }

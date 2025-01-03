@@ -43,5 +43,9 @@ public class CommentController {
         commentService.addComment(comment);
         return GlobalResultGenerator.genSuccessResult(true);
     }
-
+    @GetMapping("/commentId/id")
+    public GlobalResult<List<Comment>> getAllCommentsByComment(@RequestParam("commentId") int commentId) {
+        List<Comment> comments = commentService.getAllTopCommentsByComment(commentId);
+        return GlobalResultGenerator.genSuccessResult(comments);
+    }
 }

@@ -50,4 +50,11 @@
           and is_deleted = 0
         order by created_at desc;
     </select>
+    <select id="selectComments" parameterType="long" resultMap="CommentResultMap">
+        select id, user_id, comment,created_at,updated_at,parent_id,root_comment_id,article_id
+        from extremity_comments
+        where root_comment_id = #{id}
+          and is_deleted = 0
+        order by created_at desc;
+    </select>
 </mapper>

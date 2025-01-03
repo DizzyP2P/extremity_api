@@ -10,4 +10,5 @@ public interface CommentService {
     List<Comment> getAllComments( long rootCommentId,long articleId);
     void deleteComment(long commentId);
     List<Comment> getAllTopCommentsByUser(int userId);
+    List<Comment> getAllTopCommentsByComment(long ComentId);
 }
