@@ -3,6 +3,7 @@ package com.breech.extremity.web.api.comment;
 import com.breech.extremity.core.response.GlobalResult;
 import com.breech.extremity.core.response.GlobalResultGenerator;
 import com.breech.extremity.dto.UserRegisterInfoDTO;
+import com.breech.extremity.model.Article;
 import com.breech.extremity.model.Comment;
 import com.breech.extremity.service.CommentService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,11 @@ public class CommentController {
         System.out.println(comment.getArticleId());
         commentService.addComment(comment);
         return GlobalResultGenerator.genSuccessResult(true);
+    }
+
+    @GetMapping("/getAllarticles")
+    public GlobalResult<List<Article>> getAllArticles() {
+
     }
 
 }
