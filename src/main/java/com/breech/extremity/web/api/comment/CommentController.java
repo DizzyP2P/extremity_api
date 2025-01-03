@@ -44,9 +44,5 @@ public class CommentController {
         return GlobalResultGenerator.genSuccessResult(true);
     }
 
-    @GetMapping("/getAllarticles")
-    public GlobalResult<List<Article>> getAllArticles() {
-
-    }
 
 }
